@@ -6,8 +6,14 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+
+import org.apache.http.conn.util.InetAddressUtils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -64,16 +70,55 @@ public class MyNetworkHelper {
         setMobileDataEnabledMethod.invoke(iConnectivityManager, mobileDataEnable);
 	}
 	
-	public ArrayList<NetworkInterface> getAvailableNetworkInterfaces(){
+	/**
+	 * Gets available network interface(s)
+	 * @return List of network interfaces
+	 * @throws SocketException
+	 */
+	public ArrayList<NetworkInterface> getAvailableNetworkInterfaces() throws SocketException{
 		
 		ArrayList<NetworkInterface> listNetworkInterfaces = new ArrayList<NetworkInterface>();
 		
-		
+		//loop over all connected network interfaces
+		for(Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ){
+			NetworkInterface netInterface = en.nextElement();
+			for(Enumeration<InetAddress> enumIpAddr = netInterface.getInetAddresses(); enumIpAddr.hasMoreElements();){
+				if(!enumIpAddr.nextElement().isLoopbackAddress()){
+					listNetworkInterfaces.add(netInterface);
+					break;
+				}
+			}
+		}
 		
 		return listNetworkInterfaces;
 		
 	}
 	
+	
+	public InetAddress getIpV4AddressOfNetworkInterface(NetworkInterface networkInterface){
+		InetAddress ipV4Address = null;
+		
+		for(Enumeration<InetAddress> addresses = networkInterface.getInetAddresses(); addresses.hasMoreElements();){
+			InetAddress address = addresses.nextElement();
+			if(InetAddressUtils.isIPv4Address(address.getHostAddress().toString())){
+				ipV4Address = address;
+				break;
+			}
+		}
+		
+		return ipV4Address;
+	}
+	
+	public NetworkInterface getOneNetworkInterfaceForInterfaceName(ArrayList<NetworkInterface> listOfNetworkInterfaces,String name){
+		NetworkInterface result = null;
+		for(NetworkInterface netInterface : listOfNetworkInterfaces){
+			if(netInterface.getName().equals(name)){
+				result = netInterface;
+				break;
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * get the public (external IP of given network interface)
