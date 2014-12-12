@@ -21,6 +21,7 @@ public class MyAndroidThread {
 		if(m_myThread.getState() == Thread.State.NEW){
 			//super.start();
 			m_myThread.start();
+			String s = "";
 			return;
 			
 		}
