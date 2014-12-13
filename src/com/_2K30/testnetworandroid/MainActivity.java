@@ -170,7 +170,7 @@ public class MainActivity extends Activity {
 			if(netInterface.getName().equals(Constants.WIFI)){
 				wifiNetworkInterface = netInterface;
 			}
-			else if(netInterface.getName().equals(Constants.MOBYLE_DATA)){
+			else if(netInterface.getName().equals(Constants.MOBILE_DATA)){
 				mobileDataNetworkInterface = netInterface;
 			}
 		}
@@ -197,7 +197,7 @@ public class MainActivity extends Activity {
 			       txtClientExternalIp.setText("External IP of Server: "+m_externalIpOfServer);
 			}
 		});
-       
+
        this.showHideLoadingProcess(false);
     }
     
