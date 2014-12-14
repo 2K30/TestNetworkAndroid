@@ -6,6 +6,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+import com._2K30.testnetworkadndroid.common.MyRunnable;
 import com._2K30.testnetworkandroid.helper.Constants;
 import com._2K30.testnetworkandroid.helper.MyNetworkHelper;
 import com._2K30.testnetworkandroid.helper.NetworkHelperException;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
@@ -38,15 +40,8 @@ public class MainActivity extends Activity {
 	
 	private NetworkInterface wifiNetworkInterface = null;
 	private NetworkInterface mobileDataNetworkInterface = null;
-	
+	private Activity mainactivity;
 	private ArrayList<NetworkInterface> m_listOfNetworkInterfaces;
-	
-	private boolean m_showDialog;
-	
-	private String m_externalIpOfClient = "";
-	private String m_externalIpOfServer = "";
-	
-	private boolean m_processEnded = false;
 	
 	
 	
@@ -78,154 +73,186 @@ public class MainActivity extends Activity {
 
     
     @SuppressLint("CutPasteId") @SuppressWarnings("deprecation")
-	private void executeStartLogic() throws IOException, NetworkHelperException{
-    	
-    	try {
-			
-    		m_myNetworkHelper.enableMobileData(true, this.m_connectivityManager, this);
-			
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	//set TYPE_MOBILE to HIPRI
-    	this.m_connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
-    	
-    	//need to wait one or better two seconds. until the mobile data has been activated...
-    	try {
-			Thread.sleep(3000);
-		} 
-    	catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-    	
-    	 //mobile
+	private void executeStartLogic() throws IOException, NetworkHelperException {
+
+        try {
+
+            m_myNetworkHelper.enableMobileData(true, this.m_connectivityManager, this);
+
+        } catch (NoSuchFieldException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        //set TYPE_MOBILE to HIPRI
+        this.m_connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+
+        //need to wait one or better two seconds. until the mobile data has been activated...
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //mobile
         State mobile = m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 
         //WIFI
         State wifiState = m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-        
-        if(mobile == android.net.NetworkInfo.State.DISCONNECTED || mobile == android.net.NetworkInfo.State.DISCONNECTING)
-        {
-      	  //mobile
-      	 runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				 TextView txt = (TextView)findViewById(R.id.server_text);
-				 txt.setText("IP of Server: DISCONNECTED!");
-			}
-		});
-            
-        }
-        else if (wifiState == android.net.NetworkInfo.State.CONNECTED || wifiState == android.net.NetworkInfo.State.CONNECTING) 
-        {
-            //WIFI
-      	  
-        }
-        else if(wifiState == android.net.NetworkInfo.State.DISCONNECTED || wifiState == android.net.NetworkInfo.State.DISCONNECTING)
-        {
-      	  //WFIF
-      	    runOnUiThread(new Runnable() {
-    			
-    			@Override
-    			public void run() {
-    				TextView txt = (TextView)findViewById(R.id.client_text);
-    	            txt.setText("IP of Client: DISCONNECTED!");
-    			}
-    		});
-        } 
-        
-        try {
-			this.m_listOfNetworkInterfaces = this.m_myNetworkHelper.getAvailableNetworkInterfaces();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        if(this.m_listOfNetworkInterfaces == null){
-        	//TODO: error handle!!!!!
-        	return;
-        }
-        
-    
-       
-       for(NetworkInterface netInterface : this.m_listOfNetworkInterfaces){
-			if(netInterface.getName().equals(Constants.WIFI)){
-				wifiNetworkInterface = netInterface;
-			}
-			else if(netInterface.getName().equals(Constants.MOBILE_DATA)){
-				mobileDataNetworkInterface = netInterface;
-			}
-		}
-       
-      this.m_externalIpOfServer = m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface);
-      this.m_externalIpOfClient = m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface);
-       
-       runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				 TextView txtServerInternal = (TextView)findViewById(R.id.server_text);
-			       TextView txtClientInternal = (TextView)findViewById(R.id.client_text);
-			       
-			       //check does WIFI network interface has two addresses:
-			       
-			       txtClientInternal.setText("IP of Client: "+m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface));
-			       txtServerInternal.setText("IP of Server: "+m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface));
-			       
-			       TextView txtServerExternalIp = (TextView)findViewById(R.id.client_external_ip_text);
-			       TextView txtClientExternalIp = (TextView)findViewById(R.id.server_external_ip);
-			       
-			       txtServerExternalIp.setText("External IP of Client: "+m_externalIpOfClient);
-			       txtClientExternalIp.setText("External IP of Server: "+m_externalIpOfServer);
-			}
-		});
 
-       this.showHideLoadingProcess(false);
+        if (mobile == android.net.NetworkInfo.State.DISCONNECTED || mobile == android.net.NetworkInfo.State.DISCONNECTING) {
+            //mobile
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    TextView txt = (TextView) findViewById(R.id.server_text);
+                    txt.setText("IP of Server: DISCONNECTED!");
+                }
+            });
+
+        } else if (wifiState == android.net.NetworkInfo.State.CONNECTED || wifiState == android.net.NetworkInfo.State.CONNECTING) {
+            //WIFI
+
+        } else if (wifiState == android.net.NetworkInfo.State.DISCONNECTED || wifiState == android.net.NetworkInfo.State.DISCONNECTING) {
+            //WFIF
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    TextView txt = (TextView) findViewById(R.id.client_text);
+                    txt.setText("IP of Client: DISCONNECTED!");
+                }
+            });
+        }
+
+        try {
+            this.m_listOfNetworkInterfaces = this.m_myNetworkHelper.getAvailableNetworkInterfaces();
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (this.m_listOfNetworkInterfaces == null) {
+            //TODO: error handle!!!!!
+            return;
+        }
+
+
+        for (NetworkInterface netInterface : this.m_listOfNetworkInterfaces) {
+            if (netInterface.getName().equals(Constants.WIFI)) {
+                wifiNetworkInterface = netInterface;
+            } else if (netInterface.getName().equals(Constants.MOBILE_DATA)) {
+                mobileDataNetworkInterface = netInterface;
+            }
+        }
+
+        if(wifiNetworkInterface == null || mobileDataNetworkInterface == null){
+            mainactivity = this;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //now wifi connection, not ok for out test case!!! show toast and break up
+                    Toast t = Toast.makeText(mainactivity,"No WIFI!!!",Toast.LENGTH_LONG);
+                    t.show();
+
+                    showHideLoadingProcess(false);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(2500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            mainactivity.finish();
+                            System.exit(0);
+                        }
+                    }
+                    ).start();
+                }
+            });
+            return;
+        }
+
+        MyRunnable myRunnableSetText = null;
+        try {
+
+            myRunnableSetText = new MyRunnable(MainActivity.class.getDeclaredMethod("setTextsInTheGui",
+                                                                                    String.class,
+                                                                                    String.class,
+                                                                                    String.class,
+                                                                                    String.class),
+                                                this,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
+                                                m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface).getHostAddress(),
+                                                m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface),
+                                                m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        runOnUiThread(myRunnableSetText);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showHideLoadingProcess(false);
+            }
+        });
     }
-    
+
+    private void setTextsInTheGui(String internalIpOfClient,String internalIpOfServer,String externalIpOfClient, String externalIpOfServer){
+
+        TextView txtServerInternal = (TextView) findViewById(R.id.server_text);
+        TextView txtClientInternal = (TextView) findViewById(R.id.client_text);
+
+        //check does WIFI network interface has two addresses:
+
+        txtClientInternal.setText("IP of Client: " + internalIpOfClient);
+        txtServerInternal.setText("IP of Server: " + internalIpOfServer);
+
+        TextView txtServerExternalIp = (TextView) findViewById(R.id.client_external_ip_text);
+        TextView txtClientExternalIp = (TextView) findViewById(R.id.server_external_ip);
+
+        txtServerExternalIp.setText("External IP of Client: " + externalIpOfClient);
+        txtClientExternalIp.setText("External IP of Server: " + externalIpOfServer);
+    }
+
     /**
      * Show the loading dialog or not
      * @param show
      */
     private synchronized void showHideLoadingProcess(boolean show){
-    	this.m_showDialog = show;
-		runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-		    	 ((Button)findViewById(R.id.button1)).setEnabled(!m_showDialog);
-		         ((Button)findViewById(R.id.btn_check_serverIP)).setEnabled(!m_showDialog);
-		         ((EditText)findViewById(R.id.txt_client_to_server)).setEnabled(!m_showDialog);
-		    	
-		         m_preloadedRelativeLayout.setVisibility((m_showDialog ? View.VISIBLE : View.INVISIBLE));
-		         m_preloadedRelativeLayout.setBackgroundResource(Color.TRANSPARENT);
-		         
-		         
-		         if(m_showDialog){
-		        	 m_preloadedRelativeLayout.bringToFront();
-		         }else{
-		        	 m_mainLayout.bringToFront();
-		         }
-					}
-		});
+
+         ((Button)findViewById(R.id.button1)).setEnabled(!show);
+         ((Button)findViewById(R.id.btn_check_serverIP)).setEnabled(!show);
+         ((EditText)findViewById(R.id.txt_client_to_server)).setEnabled(!show);
+
+         m_preloadedRelativeLayout.setVisibility((show ? View.VISIBLE : View.INVISIBLE));
+         m_preloadedRelativeLayout.setBackgroundResource(Color.TRANSPARENT);
+
+
+         if(show){
+             m_preloadedRelativeLayout.bringToFront();
+         }else{
+             m_mainLayout.bringToFront();
+         }
+
     }
     
     /**
