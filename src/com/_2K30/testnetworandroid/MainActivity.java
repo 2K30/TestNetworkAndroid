@@ -71,8 +71,7 @@ public class MainActivity extends Activity {
 		}).start();
     }
 
-    
-    @SuppressLint("CutPasteId") @SuppressWarnings("deprecation")
+
 	private void executeStartLogic() throws IOException, NetworkHelperException {
 
         try {
@@ -80,22 +79,16 @@ public class MainActivity extends Activity {
             m_myNetworkHelper.enableMobileData(true, this.m_connectivityManager, this);
 
         } catch (NoSuchFieldException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+           e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
