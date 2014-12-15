@@ -10,19 +10,30 @@ public class MyRunnable implements Runnable {
 
     private Method m_myMethodToExecute;
     private Object[] m_methodArgs;
-    private Object m_executer;
+    private Object m_receiver;
 
 
+    /**
+     * Creates a runnable instance. with method to execute, receiver(target object=>owner of this method), arguments of this method
+     * @param methodToExecuteInRun
+     * @param receiver
+     * @param args
+     */
+    public MyRunnable(Method methodToExecuteInRun,Object receiver,Object... args){
 
-    public MyRunnable(Method methodToExecuteInRun,Object executer,Object... args){
-
-        setMethod(methodToExecuteInRun,executer,args);
+        setMethod(methodToExecuteInRun,receiver,args);
     }
 
-    private void setMethod(Method methodToExecuteInRun,Object executer,Object... args){
+    /**
+     * Reset defined method
+     * @param methodToExecuteInRun Method
+     * @param receiver
+     * @param args
+     */
+    private void setMethod(Method methodToExecuteInRun,Object receiver,Object... args){
         this.m_myMethodToExecute = methodToExecuteInRun;
         this.m_methodArgs = args;
-        this.m_executer = executer;
+        this.m_receiver = receiver;
         this.m_myMethodToExecute.setAccessible(true);
     }
 
@@ -40,7 +51,7 @@ public class MyRunnable implements Runnable {
     }
 
     public void setMethodOwnerObject(Object ownerObject){
-        this.m_executer = ownerObject;
+        this.m_receiver = ownerObject;
     }
 
     public void resetMethod(Method methodToExecuteInRun,Object executer,Object... args){
@@ -50,7 +61,7 @@ public class MyRunnable implements Runnable {
     @Override
     public void run() {
         try {
-            this.m_myMethodToExecute.invoke(this.m_executer,m_methodArgs);
+            this.m_myMethodToExecute.invoke(this.m_receiver,m_methodArgs);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

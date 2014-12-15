@@ -5,7 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.lang.reflect.Method;
 
+import com._2K30.testnetworkadndroid.common.Common;
 import com._2K30.testnetworkadndroid.common.MyRunnable;
 import com._2K30.testnetworkandroid.helper.Constants;
 import com._2K30.testnetworkandroid.helper.MyNetworkHelper;
@@ -19,6 +21,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.*;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -184,20 +187,22 @@ public class MainActivity extends Activity {
         }
 
         MyRunnable myRunnableSetText = null;
-        try {
 
-            myRunnableSetText = new MyRunnable(MainActivity.class.getDeclaredMethod("setTextsInTheGui",
-                                                                                    String.class,
-                                                                                    String.class,
-                                                                                    String.class,
-                                                                                    String.class),
+
+            Method[] methods = Common.getMethodFromClass(MainActivity.class,"setTextsInTheGui");
+
+            if(methods.length < 1){
+                //fatal error!!!!
+                Log.d("FATAL ERROR","Method [setTextsInTheGui] not found!");
+                System.exit(0);
+                return;
+            }
+
+            myRunnableSetText = new MyRunnable(methods[0],
                                                 this,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
                                                 m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface).getHostAddress(),
                                                 m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface),
                                                 m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface));
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
 
         runOnUiThread(myRunnableSetText);
 
