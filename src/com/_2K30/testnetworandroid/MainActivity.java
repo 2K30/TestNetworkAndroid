@@ -33,17 +33,24 @@ import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
-	
+
+    //======== layouts ===========
 	private RelativeLayout m_mainLayout;
 	private RelativeLayout m_preloadedRelativeLayout;
-	
+
+    //
 	private ConnectivityManager m_connectivityManager;
-	
+
+
 	private MyNetworkHelper m_myNetworkHelper;
-	
+
+    //======= network objects ========
 	private NetworkInterface wifiNetworkInterface = null;
 	private NetworkInterface mobileDataNetworkInterface = null;
-	private Activity mainactivity;
+
+	private Activity mainactivity = null;
+
+
 	private ArrayList<NetworkInterface> m_listOfNetworkInterfaces;
 	
 	
@@ -126,7 +133,7 @@ public class MainActivity extends Activity {
             //WIFI
 
         } else if (wifiState == android.net.NetworkInfo.State.DISCONNECTED || wifiState == android.net.NetworkInfo.State.DISCONNECTING) {
-            //WFIF
+            //WIFI
             runOnUiThread(new Runnable() {
 
                 @Override
@@ -186,9 +193,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-        MyRunnable myRunnableSetText = null;
-
-
             Method[] methods = Common.getMethodFromClass(MainActivity.class,"setTextsInTheGui");
 
             if(methods.length < 1){
@@ -198,12 +202,13 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            myRunnableSetText = new MyRunnable(methods[0],
-                                                this,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
-                                                m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface).getHostAddress(),
-                                                m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface),
-                                                m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface));
-
+        //create a overwritten runnable object, with action method on calling run().
+            MyRunnable myRunnableSetText = new MyRunnable(methods[0],
+                                                            this,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
+                                                            m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface).getHostAddress(),
+                                                            m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface),
+                                                            m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface));
+    //run on ui thread for update text...
         runOnUiThread(myRunnableSetText);
 
         runOnUiThread(new Runnable() {
