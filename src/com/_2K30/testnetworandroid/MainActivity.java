@@ -2,6 +2,7 @@ package com._2K30.testnetworandroid;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.DatagramSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import com._2K30.testnetworkandroid.helper.Constants;
 import com._2K30.testnetworkandroid.helper.MyNetworkHelper;
 import com._2K30.testnetworkandroid.helper.NetworkHelperException;
 import com.example.testnetworandroid.R;
+
+import com.android.server.*;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -65,17 +68,18 @@ public class MainActivity extends Activity {
       this.showHideLoadingProcess(true);
        
        new Thread(new Runnable() {
-			
 			@Override
 			public void run() {
 				try {
 					executeStartLogic();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// trace error! and break up
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (NetworkHelperException e) {
+					// trace error and break up!
 					e.printStackTrace();
-				} catch (NetworkHelperException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    System.exit(0);
 				}
 			}
 		}).start();
@@ -152,7 +156,8 @@ public class MainActivity extends Activity {
         }
 
         if (this.m_listOfNetworkInterfaces == null) {
-            //TODO: error handle!!!!!
+            Log.e("No network interface","No network interfaces have been found!");
+            System.exit(0);
             return;
         }
 
@@ -238,7 +243,7 @@ public class MainActivity extends Activity {
 
     /**
      * Show the loading dialog or not
-     * @param show
+     * @param show true for show loading, false for hide
      */
     private synchronized void showHideLoadingProcess(boolean show){
 

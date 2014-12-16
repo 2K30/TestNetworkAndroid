@@ -1,5 +1,9 @@
 package com._2K30.testnetworkandroid.helper;
-
+/**
+ * NetworkHelperException
+ * @author 2K30
+ *
+ */
 public class NetworkHelperException extends Exception {
 
 	private String m_message;

@@ -1,5 +1,8 @@
 package com._2K30.testnetworkandroid.helper;
-
+/**
+ * Contains most useful constants
+ * @author 2K30
+ */
 public class Constants {
 
     /**
