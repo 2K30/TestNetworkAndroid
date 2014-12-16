@@ -52,6 +52,7 @@ public class Server {
                 public void run() {
                     byte[] sendData = new byte[1024];
                     byte[] receiveData = new byte[1024];
+                    String s = "";
                     while (true){
 
                         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
