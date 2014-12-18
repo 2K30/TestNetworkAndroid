@@ -16,12 +16,15 @@ public class MyAndroidThread {
 	/**
      * Starts the new Thread of execution. 
      */
-	public synchronized void start() {
-		// TODO Auto-generated method stub
+	public synchronized void start() throws  NullPointerException{
+
+        if(m_myThread == null){
+            throw new NullPointerException("Main Thread object is null!!!!");
+        }
+
 		if(m_myThread.getState() == Thread.State.NEW){
 			//super.start();
 			m_myThread.start();
-			String s = "";
 			return;
 			
 		}
@@ -58,5 +61,21 @@ public class MyAndroidThread {
     public State getState() {
     	return this.m_myThread.getState(); 
     }
-	
+
+    /**
+     * Set main thread
+     * @param thread
+     */
+    public  void setMyThread(Thread thread){
+        this.m_myThread = thread;
+    }
+
+    /**
+     * Returns the main running thread
+     * @return
+     */
+    public Thread getMyMainThread(){
+        return this.m_myThread;
+    }
+
 }

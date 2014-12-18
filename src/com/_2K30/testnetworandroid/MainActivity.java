@@ -2,7 +2,9 @@ package com._2K30.testnetworandroid;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -262,7 +264,12 @@ public class MainActivity extends Activity {
          }
 
     }
-    
+
+
+    public void onDataReceiveServer(DatagramPacket receivePacket){
+
+    }
+
     /**
      * Initialize members etc. ...
      */
