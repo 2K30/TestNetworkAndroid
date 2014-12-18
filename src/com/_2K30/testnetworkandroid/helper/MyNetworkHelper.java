@@ -19,6 +19,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
+import com._2K30.testnetworkandroid.connectivity.*;
+
 /**
  * Contains most useful methods for network (this application) 
  * @author 2K30
@@ -134,11 +136,15 @@ public class MyNetworkHelper {
 		}
 		
 		Process process = null;
-		
+
+        //process = Runtime.getRuntime().exec("apt-get install hping3");
+
+
+
 		String command = "curl --interface "+networkInterface.getName()+" http://ipecho.net/plain";
 		
 		process = Runtime.getRuntime().exec(command);
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		StringBuilder stringBuilder = new StringBuilder();
 		
@@ -170,5 +176,20 @@ public class MyNetworkHelper {
 		}
 		return s_instanceOfMyNetworkHelper;
 	}
-	
+
+    /**
+     * Create connection between server and client
+     * @param client Client which should connected to server
+     * @param server Server
+     * @throws NetworkHelperException
+     */
+    public static void ConnectClientToServer(Client client, Server server) throws NetworkHelperException {
+
+        if(client == null || server == null){
+            throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
+        }
+
+
+
+    }
 }

@@ -53,6 +53,7 @@ public class Server {
                                 try {
 
                                     m_server.receive(receivePacket);
+
                                     //call given method for receive only if both elements(method and owner) are not equal null
                                     if (m_methodCallOnReceive != null && m_methodCaller != null) {
 

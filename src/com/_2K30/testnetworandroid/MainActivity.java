@@ -17,9 +17,6 @@ import com._2K30.testnetworkandroid.helper.MyNetworkHelper;
 import com._2K30.testnetworkandroid.helper.NetworkHelperException;
 import com.example.testnetworandroid.R;
 
-import com.android.server.*;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
