@@ -246,9 +246,14 @@ public class MainActivity extends Activity {
      */
     private synchronized void showHideLoadingProcess(boolean show){
 
-         ((Button)findViewById(R.id.button1)).setEnabled(!show);
-         ((Button)findViewById(R.id.btn_check_serverIP)).setEnabled(!show);
-         ((EditText)findViewById(R.id.txt_client_to_server)).setEnabled(!show);
+         Button btn1 = (Button)findViewById(R.id.button1);
+         btn1.setEnabled(!show);
+
+         btn1 = (Button)findViewById(R.id.btn_check_serverIP);
+         btn1.setEnabled(!show);
+
+         EditText txt = (EditText)findViewById(R.id.txt_client_to_server);
+         txt.setEnabled(!show);
 
          m_preloadedRelativeLayout.setVisibility((show ? View.VISIBLE : View.INVISIBLE));
          m_preloadedRelativeLayout.setBackgroundResource(Color.TRANSPARENT);
