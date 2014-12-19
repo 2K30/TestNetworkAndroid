@@ -1,8 +1,12 @@
 package com._2K30.testnetworkandroid.connectivity;
 
 import com._2K30.testnetworkadndroid.common.MyAndroidThread;
+import com._2K30.testnetworkandroid.helper.Constants;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -11,7 +15,8 @@ import java.net.SocketException;
  * Created by 2K30 on 16.12.2014.
  * @author 2K30
  */
-public class Client {
+public class Client implements IClientServer{
+
 
     private InetAddress m_clientInetAddress = null;
     private Server m_serverConnectedTo = null;
@@ -54,21 +59,109 @@ public class Client {
         this.initializeClient(address,port,server,methodToCall,owner);
     }
 
+    @Override
+    public void stop(){
+        this.m_clientSocket.close();
+        this.m_MyAndroidThread.stop();
+    }
 
+    @Override
     public void startAsync(){
+        if(m_MyAndroidThread == null) {
 
+            m_MyAndroidThread = new MyAndroidThread(
+
+                    //create and start listening thread...
+                    new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            byte[] receiveData = new byte[1024];
+
+                            while(!Thread.currentThread().isInterrupted()){
+                                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                                try {
+                                    m_clientSocket.receive(receivePacket);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    continue;
+                                }
+
+                                if(m_methodCaller != null && m_methodCallOnReceive != null){
+                                    try {
+                                        m_methodCallOnReceive.invoke(m_methodCaller,receivePacket);
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    } catch (InvocationTargetException e) {
+                                        e.printStackTrace();
+                                    }
+                                }//if method and owner != null
+                                else{
+                                    handleDefaultReceive(receivePacket);
+                                }//else
+                            }//while receiving (always true)
+
+                        }//void run()
+                    }
+            );
+            m_MyAndroidThread.start();
+        }
+        else{
+            if(m_MyAndroidThread.getState() == Thread.State.WAITING || m_MyAndroidThread.getState() == Thread.State.TIMED_WAITING){
+                return;
+            }else{
+                //in other case restart the main receive thread
+                m_MyAndroidThread.start();
+            }
+        }
+    }
+
+    /**
+     * Sends a given message
+     * @param message message to send
+     * @throws IOException
+     */
+    @Override
+    public void sendMessage(String message) throws IOException {
+        InetAddress serverAddress = this.m_serverConnectedTo.getServerSocket().getInetAddress();
+        int serverPort = this.m_serverConnectedTo.getServerSocket().getPort();
+        DatagramPacket sendPacket = new DatagramPacket(message.getBytes(),message.getBytes().length,serverAddress,serverPort);
+        this.m_clientSocket.send(sendPacket);
+    }
+
+    /**
+     * Sends default message
+     * @throws IOException
+     */
+    @Override
+    public void sendMessage() throws IOException {
+        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND);
+    }
+
+
+    /**
+     * Default handle on receive
+     * @param receivedPacket
+     */
+    private void handleDefaultReceive(DatagramPacket receivedPacket){
+        //TODO:
     }
 
     private void initializeClient(InetAddress address,int port, Server server, Method method, Object methodOwner) throws SocketException {
 
+        this.m_clientInetAddress = address;
         this.m_clientSocket = new DatagramSocket(port, address);
-
+        this.m_clientPort = port;
         this.m_serverConnectedTo = server;
 
         this.m_methodCallOnReceive = method;
         this.m_methodCaller = methodOwner;
 
 
+        if(this.m_methodCallOnReceive != null){
+            this.m_methodCallOnReceive.setAccessible(true);
+        }
     }
 
 }

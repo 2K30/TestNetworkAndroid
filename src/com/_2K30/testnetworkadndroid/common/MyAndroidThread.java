@@ -12,7 +12,12 @@ public class MyAndroidThread {
 		m_myThreadRunnable = runnable;
 		m_myThread = new Thread(runnable);
 	}
-	
+
+
+    public void stop(){
+        this.m_myThread.interrupt();
+    }
+
 	/**
      * Starts the new Thread of execution. 
      */
@@ -25,7 +30,6 @@ public class MyAndroidThread {
 		if(m_myThread.getState() == Thread.State.NEW){
 			//super.start();
 			m_myThread.start();
-			return;
 			
 		}
 		else if(m_myThread.getState() == Thread.State.TERMINATED || m_myThread.getState() == State.RUNNABLE){

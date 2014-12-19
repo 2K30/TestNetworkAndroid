@@ -14,5 +14,10 @@ public class Constants {
      * Constant for mobile data network interface name (rmnet_data0)
      */
 	public static final String MOBILE_DATA = "rmnet_data0";
+
+    /**
+     * Default value for message
+     */
+    public static final String DEFAULT_MESSAGE_TO_SEND = "hello";
 	
 }

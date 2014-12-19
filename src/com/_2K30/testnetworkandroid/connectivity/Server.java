@@ -1,6 +1,7 @@
 package com._2K30.testnetworkandroid.connectivity;
 
 import com._2K30.testnetworkadndroid.common.MyAndroidThread;
+import com._2K30.testnetworkandroid.helper.Constants;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -15,14 +16,15 @@ import java.util.ArrayList;
  * Created by 2K30 on 16.12.2014.
  * @author 2K30
  */
-public class Server {
+public class Server implements IClientServer {
 
     private DatagramSocket m_server = null;
     private ArrayList<DatagramSocket> m_listOfConnectedClients = null;
     private Method m_methodCallOnReceive = null;
     private Object m_methodCaller = null;
     private MyAndroidThread m_MyAndroidThread = null;
-
+    private MyAndroidThread m_checkClientStatesThread = null;
+    private Object lock = new Object();
     public void Server (int port, InetAddress address,Method methodOnReceive, Object caller) throws SocketException {
       this.initializeServer(port,address,methodOnReceive,caller);
     }
@@ -32,6 +34,32 @@ public class Server {
        this.initializeServer(port,address);
     }
 
+    /**
+     * Sends a given message
+     * @param message message to send
+     * @throws IOException
+     */
+    @Override
+    public void sendMessage(String message) throws IOException {
+
+    }
+
+    /**
+     * Sends default message
+     * @throws IOException
+     */
+    @Override
+    public void sendMessage() throws IOException {
+        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND);
+    }
+
+    @Override
+    public void stop() {
+        this.m_server.close();
+        this.m_MyAndroidThread.stop();
+    }
+
+    @Override
     public void startAsync() {
 
         if(m_MyAndroidThread == null) {
@@ -44,10 +72,9 @@ public class Server {
                         @Override
                         public void run() {
 
-                            byte[] sendData = new byte[1024];
                             byte[] receiveData = new byte[1024];
 
-                            while (true) {
+                            while (!Thread.currentThread().isInterrupted()) {
 
                                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                                 try {
@@ -98,8 +125,7 @@ public class Server {
         int clientPort = receivePacket.getPort();
         DatagramSocket clientSocket = new DatagramSocket(clientPort, clientAddress);
 
-        if (m_listOfConnectedClients.contains(clientSocket)) {
-        } else {
+        if (!m_listOfConnectedClients.contains(clientSocket)) {
             m_listOfConnectedClients.add(clientSocket);
         }
     }
@@ -134,9 +160,24 @@ public class Server {
             //set remote call enable
             m_methodCallOnReceive.setAccessible(true);
         }
+    }
+
+    private synchronized void checkForStatesOfCliets(){
+      //TODO: implement logic for tests of connected clients. Some thing like thread for client 10 clients, running 10 check threads.
+    }
+
+    private synchronized void actionOnClietDisconnected(){
 
     }
 
+
+    public DatagramSocket getServerSocket(){
+        return this.m_server;
+    }
+
+    public boolean isConnected(){
+        return this.m_server.isConnected();
+    }
 
 
 }
