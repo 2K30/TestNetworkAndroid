@@ -3,7 +3,7 @@ package com._2K30.testnetworkandroid.connectivity;
 import java.io.IOException;
 
 /**
- * Created by konstantin on 19.12.14.
+ * Created by 2K30 on 19.12.14.
  */
 public interface IClientServer {
 
