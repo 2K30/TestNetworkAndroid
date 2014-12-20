@@ -15,6 +15,7 @@
 	<color name="green">#008000</color>
 	<color name="blue">#0000FF</color>
 	<color name="navy">#000080</color>
+    <color name="bootLoading">#1C1C1C</color>
  <color name="black">#000000</color>
  <color name="green_arrow">#CC46FF35</color>
 </resources>

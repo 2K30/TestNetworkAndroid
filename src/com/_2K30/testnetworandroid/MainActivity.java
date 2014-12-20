@@ -3,15 +3,15 @@ package com._2K30.testnetworandroid;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 
-import com._2K30.testnetworkadndroid.common.Common;
+import com._2K30.testnetworkadndroid.common.*;
 import com._2K30.testnetworkadndroid.common.MyRunnable;
+import com._2K30.testnetworkandroid.connectivity.*;
 import com._2K30.testnetworkandroid.helper.Constants;
 import com._2K30.testnetworkandroid.helper.MyNetworkHelper;
 import com._2K30.testnetworkandroid.helper.NetworkHelperException;
@@ -21,12 +21,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo.*;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
+import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -34,15 +35,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
 public class MainActivity extends Activity {
 
     //======== layouts ===========
 	private RelativeLayout m_mainLayout;
 	private RelativeLayout m_preloadedRelativeLayout;
-
+    private AbsoluteLayout m_boolLoadingLayout;
     //
 	private ConnectivityManager m_connectivityManager;
 
+    private Context mainContext = this;
 
 	private MyNetworkHelper m_myNetworkHelper;
 
@@ -52,6 +55,7 @@ public class MainActivity extends Activity {
 
 	private Activity mainactivity = null;
 
+    private boolean m_enableToUsePreload = false;
 
 	private ArrayList<NetworkInterface> m_listOfNetworkInterfaces;
 	
@@ -60,11 +64,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        
-       this.initialize();
-       
-      this.showHideLoadingProcess(true);
+        SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
+        GifRunCommon g = new GifRunCommon();
+        g.LoadGiff(view,mainContext,R.drawable.bootloading);
+
+        this.initialize();
+        this.showBootAnimation(true);
+
+      //this.showHideLoadingProcess(true);
        
        new Thread(new Runnable() {
 			@Override
@@ -79,13 +88,15 @@ public class MainActivity extends Activity {
 					// trace error and break up!
 					e.printStackTrace();
                     System.exit(0);
-				}
-			}
+				} catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 		}).start();
     }
 
 
-	private void executeStartLogic() throws IOException, NetworkHelperException {
+	private void executeStartLogic() throws IOException, NetworkHelperException, InterruptedException {
 
         try {
 
@@ -115,13 +126,8 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        //mobile
-        State mobile = m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 
-        //WIFI
-        State wifiState = m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-
-        if (mobile == android.net.NetworkInfo.State.DISCONNECTED || mobile == android.net.NetworkInfo.State.DISCONNECTING) {
+        if (m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == android.net.NetworkInfo.State.DISCONNECTED || m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == android.net.NetworkInfo.State.DISCONNECTING) {
             //mobile
             runOnUiThread(new Runnable() {
 
@@ -132,10 +138,10 @@ public class MainActivity extends Activity {
                 }
             });
 
-        } else if (wifiState == android.net.NetworkInfo.State.CONNECTED || wifiState == android.net.NetworkInfo.State.CONNECTING) {
+        } else if (m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == android.net.NetworkInfo.State.CONNECTED || m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == android.net.NetworkInfo.State.CONNECTING) {
             //WIFI
 
-        } else if (wifiState == android.net.NetworkInfo.State.DISCONNECTED || wifiState == android.net.NetworkInfo.State.DISCONNECTING) {
+        } else if (m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == android.net.NetworkInfo.State.DISCONNECTED || m_connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == android.net.NetworkInfo.State.DISCONNECTING) {
             //WIFI
             runOnUiThread(new Runnable() {
 
@@ -218,33 +224,56 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                showBootAnimation(false);
+
                 showHideLoadingProcess(false);
             }
         });
+
+        //now create connection between server and client
+        Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+
+        MyNetworkHelper.ConnectClientToServer(client,server);
+
     }
 
     private void setTextsInTheGui(String internalIpOfClient,String internalIpOfServer,String externalIpOfClient, String externalIpOfServer){
+            TextView txtServerInternal = (TextView) findViewById(R.id.server_text);
+            TextView txtClientInternal = (TextView) findViewById(R.id.client_text);
 
-        TextView txtServerInternal = (TextView) findViewById(R.id.server_text);
-        TextView txtClientInternal = (TextView) findViewById(R.id.client_text);
+            //check does WIFI network interface has two addresses:
 
-        //check does WIFI network interface has two addresses:
+            txtClientInternal.setText("IP of Client: " + internalIpOfClient);
+            txtServerInternal.setText("IP of Server: " + internalIpOfServer);
 
-        txtClientInternal.setText("IP of Client: " + internalIpOfClient);
-        txtServerInternal.setText("IP of Server: " + internalIpOfServer);
+            TextView txtServerExternalIp = (TextView) findViewById(R.id.client_external_ip_text);
+            TextView txtClientExternalIp = (TextView) findViewById(R.id.server_external_ip);
 
-        TextView txtServerExternalIp = (TextView) findViewById(R.id.client_external_ip_text);
-        TextView txtClientExternalIp = (TextView) findViewById(R.id.server_external_ip);
-
-        txtServerExternalIp.setText("External IP of Client: " + externalIpOfClient);
-        txtClientExternalIp.setText("External IP of Server: " + externalIpOfServer);
+            txtServerExternalIp.setText("External IP of Client: " + externalIpOfClient);
+            txtClientExternalIp.setText("External IP of Server: " + externalIpOfServer);
     }
+
+    private void showBootAnimation(boolean show){
+        this.m_enableToUsePreload = !show;
+        this.m_boolLoadingLayout.setVisibility((show ? View.VISIBLE : View.INVISIBLE));
+        this.m_preloadedRelativeLayout.setVisibility((!show) ? View.VISIBLE : View.INVISIBLE);
+        if(show){
+            m_boolLoadingLayout.bringToFront();
+        }else{
+           m_mainLayout.bringToFront();
+        }
+    }
+
 
     /**
      * Show the loading dialog or not
      * @param show true for show loading, false for hide
      */
     private synchronized void showHideLoadingProcess(boolean show){
+
+        if(!this.m_enableToUsePreload){return;}
+
 
          Button btn1 = (Button)findViewById(R.id.button1);
          btn1.setEnabled(!show);
@@ -262,7 +291,9 @@ public class MainActivity extends Activity {
          if(show){
              m_preloadedRelativeLayout.bringToFront();
          }else{
+
              m_mainLayout.bringToFront();
+
          }
 
     }
@@ -280,6 +311,7 @@ public class MainActivity extends Activity {
     	 m_connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
     	 m_myNetworkHelper = MyNetworkHelper.getInstance();
          m_preloadedRelativeLayout = (RelativeLayout)findViewById(R.id.preload_layout);
+        m_boolLoadingLayout = (AbsoluteLayout)findViewById(R.id.bootLoadingLayout);
     }
     
 
@@ -301,5 +333,7 @@ public class MainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
+
+
 }

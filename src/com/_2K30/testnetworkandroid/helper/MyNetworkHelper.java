@@ -164,7 +164,11 @@ public class MyNetworkHelper {
 	 * ============================================================
 	 */
 	
-	
+	public  static  int getOpenPort(InetAddress address){
+        return -1;
+    }
+
+
 	/**
 	 * Creates / gets the instance of MyNetworkHelper class
 	 * @return MyNetworkHelper instance
@@ -177,18 +181,21 @@ public class MyNetworkHelper {
 	}
 
     /**
-     * Create connection between server and client
+     * Create connection between server and client (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)
      * @param client Client which should connected to server
      * @param server Server
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(Client client, Server server) throws NetworkHelperException {
+    public static void ConnectClientToServer(Client client, Server server) throws NetworkHelperException, IOException {
 
         if(client == null || server == null){
             throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
         }
 
-
-
+        server.startAsync();
+        client.startAsync();
+        client.sendMessage();
+        server.sendMessage(client);
+        client.sendMessage("Ist das angekoemmon?");
     }
 }

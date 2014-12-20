@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:background="@color/bootLoading">
+
+
+    <SurfaceView
+        android:layout_width="159dp"
+        android:layout_height="159dp"
+        android:id="@+id/surfaceView"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_x="98dp"
+        android:layout_y="162dp" />
+</AbsoluteLayout>

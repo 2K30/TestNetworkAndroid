@@ -9,14 +9,19 @@ import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 
 /**
  * Created by 2K30 on 16.12.2014.
  * @author 2K30
  */
-public class Server implements IClientServer {
+public class Server {
 
     private DatagramSocket m_server = null;
     private ArrayList<DatagramSocket> m_listOfConnectedClients = null;
@@ -25,13 +30,14 @@ public class Server implements IClientServer {
     private MyAndroidThread m_MyAndroidThread = null;
     private MyAndroidThread m_checkClientStatesThread = null;
     private Object lock = new Object();
-    public void Server (int port, InetAddress address,Method methodOnReceive, Object caller) throws SocketException {
-      this.initializeServer(port,address,methodOnReceive,caller);
+    private InetAddress m_publicAddress;
+    public Server (int port, InetAddress address,Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
+      this.initializeServer(port,address,methodOnReceive,caller,publicAddress);
     }
 
-    public void Server(int port, InetAddress address) throws SocketException {
+    public Server(int port, InetAddress address,InetAddress publicAddress) throws IOException, InterruptedException {
 
-       this.initializeServer(port,address);
+       this.initializeServer(port,address,publicAddress);
     }
 
     /**
@@ -39,27 +45,26 @@ public class Server implements IClientServer {
      * @param message message to send
      * @throws IOException
      */
-    @Override
-    public void sendMessage(String message) throws IOException {
-
+    public void sendMessage(String message, Client client) throws IOException {
+        InetAddress clientAddress = client.getExternelAddress();
+        int clientPort = 8888;//client.getClientSocket().getPort();
+        DatagramPacket sendPacket = new DatagramPacket(message.getBytes(),message.getBytes().length,clientAddress,clientPort);
+        this.m_server.send(sendPacket);
     }
 
     /**
      * Sends default message
      * @throws IOException
      */
-    @Override
-    public void sendMessage() throws IOException {
-        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND);
+    public void sendMessage(Client client) throws IOException {
+        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND, client);
     }
 
-    @Override
     public void stop() {
         this.m_server.close();
         this.m_MyAndroidThread.stop();
     }
 
-    @Override
     public void startAsync() {
 
         if(m_MyAndroidThread == null) {
@@ -136,8 +141,8 @@ public class Server implements IClientServer {
      * @param address server address (public ip for accessibility from other networks or internet)
      * @throws SocketException
      */
-    private void initializeServer(int port, InetAddress address) throws SocketException {
-        this.initializeServer(port,address,null,null);
+    private void initializeServer(int port, InetAddress address, InetAddress publicAddress) throws IOException, InterruptedException {
+        this.initializeServer(port,address,null,null,publicAddress);
     }
 
     /**
@@ -148,13 +153,13 @@ public class Server implements IClientServer {
      * @param caller owner of method on receive
      * @throws SocketException
      */
-    private void initializeServer(int port, InetAddress address, Method methodOnReceive, Object caller) throws SocketException {
+    private void initializeServer(int port, InetAddress address, Method methodOnReceive, Object caller,InetAddress publicAddress) throws IOException, InterruptedException {
 
         this.m_methodCaller = caller;
         this.m_methodCallOnReceive = methodOnReceive;
-
-        m_server = new DatagramSocket(port, address);
-
+        m_server = new DatagramSocket(8888, address);
+        this.m_publicAddress = publicAddress;
+        Thread.sleep(500);
         if (methodOnReceive != null && caller != null) {
 
             //set remote call enable
@@ -178,6 +183,8 @@ public class Server implements IClientServer {
     public boolean isConnected(){
         return this.m_server.isConnected();
     }
+
+    public InetAddress getExternalAddress(){return this.m_publicAddress;}
 
 
 }
