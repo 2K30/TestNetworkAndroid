@@ -1,5 +1,7 @@
 package com._2K30.testnetworkandroid.connectivity;
 
+import android.net.ConnectivityManager;
+
 import com._2K30.testnetworkadndroid.common.MyAndroidThread;
 import com._2K30.testnetworkandroid.helper.Constants;
 
@@ -31,6 +33,8 @@ public class Server {
     private MyAndroidThread m_checkClientStatesThread = null;
     private Object lock = new Object();
     private InetAddress m_publicAddress;
+    public int portToTest = 0;
+    public ConnectivityManager conManager;
     public Server (int port, InetAddress address,Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
       this.initializeServer(port,address,methodOnReceive,caller,publicAddress);
     }
@@ -47,9 +51,13 @@ public class Server {
      */
     public void sendMessage(String message, Client client) throws IOException {
         InetAddress clientAddress = client.getExternelAddress();
-        int clientPort = 8888;//client.getClientSocket().getPort();
-        DatagramPacket sendPacket = new DatagramPacket(message.getBytes(),message.getBytes().length,clientAddress,clientPort);
-        this.m_server.send(sendPacket);
+        //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+        int clientPort = client.getClientSocket().getLocalPort();//client.getClientSocket().getPort();
+        //for( clientPort = 10000; clientPort <65535;clientPort++) {
+            DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
+            this.m_server.send(sendPacket);
+        //}
+        //client.sendMessage();
     }
 
     /**
@@ -77,7 +85,7 @@ public class Server {
                         @Override
                         public void run() {
 
-                            byte[] receiveData = new byte[1024];
+                            byte[] receiveData = new byte[65508];
 
                             while (!Thread.currentThread().isInterrupted()) {
 
@@ -157,7 +165,7 @@ public class Server {
 
         this.m_methodCaller = caller;
         this.m_methodCallOnReceive = methodOnReceive;
-        m_server = new DatagramSocket(8888, address);
+        m_server = new DatagramSocket(port, address);
         this.m_publicAddress = publicAddress;
         Thread.sleep(500);
         if (methodOnReceive != null && caller != null) {

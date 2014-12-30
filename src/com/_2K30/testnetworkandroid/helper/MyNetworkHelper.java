@@ -18,6 +18,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
+import com._2K30.testnetworkadndroid.common.Common;
+import com._2K30.testnetworkadndroid.common.MyRunnable;
 import com._2K30.testnetworkandroid.connectivity.*;
 
 /**
@@ -28,7 +30,7 @@ import com._2K30.testnetworkandroid.connectivity.*;
 public class MyNetworkHelper {
 
 	private static MyNetworkHelper s_instanceOfMyNetworkHelper;
-	
+	public boolean keepInterfaceAllive = true;
 	/**
 	 * Invisible instance of this class
 	 */
@@ -55,22 +57,26 @@ public class MyNetworkHelper {
 			throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
 		
 		conManager = (ConnectivityManager)activity.getSystemService(Context.CONNECTIVITY_SERVICE);
-        
-		Class<?> conmanClass = Class.forName(conManager.getClass().getName());
+        this.enableMobileConnectionData(mobileDataEnable,conManager);
+
+	}
+
+    private void enableMobileConnectionData(boolean mobileDataEnable,ConnectivityManager conManager) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        Class<?> conmanClass = Class.forName(conManager.getClass().getName());
         Field iConnectivityManagerField = conmanClass.getDeclaredField("mService");
-        
-		iConnectivityManagerField.setAccessible(true);
-        
-		Object iConnectivityManager = iConnectivityManagerField.get(conManager);
-        
-		Class<?> iConnectivityManagerClass = Class.forName(iConnectivityManager.getClass().getName());
-        
-		Method setMobileDataEnabledMethod = iConnectivityManagerClass.getDeclaredMethod("setMobileDataEnabled", Boolean.TYPE);
-        
+
+        iConnectivityManagerField.setAccessible(true);
+
+        Object iConnectivityManager = iConnectivityManagerField.get(conManager);
+
+        Class<?> iConnectivityManagerClass = Class.forName(iConnectivityManager.getClass().getName());
+
+        Method setMobileDataEnabledMethod = iConnectivityManagerClass.getDeclaredMethod("setMobileDataEnabled", Boolean.TYPE);
+
         setMobileDataEnabledMethod.setAccessible(true);
         setMobileDataEnabledMethod.invoke(iConnectivityManager, mobileDataEnable);
-	}
-	
+    }
+
 	/**
 	 * Gets available network interface(s)
 	 * @return List of network interfaces
@@ -157,8 +163,27 @@ public class MyNetworkHelper {
 		process = null;
 		return stringBuilder.toString();
 	}
-	
-	
+
+    /**
+     * Keep the given interface alive. It is necessary to hold connection. Every reconnect leads to new public/internal address
+     * @param networkInterface network interface for holding connection
+     * @throws IOException
+     * @throws NetworkHelperException
+     */
+    public synchronized void keepInterfaceAllive(NetworkInterface networkInterface, ConnectivityManager connectivityManager) throws IOException, NetworkHelperException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        //this is the same as ping one internet site
+        while(keepInterfaceAllive) {
+            this.enableMobileConnectionData(true,connectivityManager);
+            connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+            this.getExternalIpOfInterface(networkInterface);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 	/* ============================================================
 	 * ==================== STATIC SECTION ========================
 	 * ============================================================
@@ -186,7 +211,7 @@ public class MyNetworkHelper {
      * @param server Server
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(Client client, Server server) throws NetworkHelperException, IOException {
+    public static void ConnectClientToServer(final Client client, final Server server) throws NetworkHelperException, IOException {
 
         if(client == null || server == null){
             throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
@@ -194,8 +219,17 @@ public class MyNetworkHelper {
 
         server.startAsync();
         client.startAsync();
-        client.sendMessage();
-        server.sendMessage(client);
-        client.sendMessage("Ist das angekoemmon?");
+
+        new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+
+        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
+        new Thread(sendAsync).start();
+
+
+
+        //client.sendMessage();
+
+        //server.sendMessage(client);
+        //client.sendMessage("Ist das angekoemmon?");
     }
 }

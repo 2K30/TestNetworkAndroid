@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
         GifRunCommon g = new GifRunCommon();
-        g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -231,11 +231,36 @@ public class MainActivity extends Activity {
         });
 
         //now create connection between server and client
-        Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
-        Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        server.conManager = this.m_connectivityManager;
+        client.conManager = this.m_connectivityManager;
+
+        MyRunnable keepConnectivity = new MyRunnable(Common.getMethodFromClass(MyNetworkHelper.class,"keepInterfaceAllive")[0],m_myNetworkHelper,mobileDataNetworkInterface,this.m_connectivityManager);
+        MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
+        keepAliveConnectivityThread.start();
 
         MyNetworkHelper.ConnectClientToServer(client,server);
+        ((Button)findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String message = ((EditText)findViewById(R.id.txt_client_to_server)).getText().toString();
+                            server.sendMessage(message,client);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                }).start();
 
+            }
+        });
     }
 
     private void setTextsInTheGui(String internalIpOfClient,String internalIpOfServer,String externalIpOfClient, String externalIpOfServer){
@@ -299,7 +324,15 @@ public class MainActivity extends Activity {
     }
 
 
-    public void onDataReceiveServer(DatagramPacket receivePacket){
+    public void onDataReceiveServer(final DatagramPacket receivePacket){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message = new String(receivePacket.getData(),0,receivePacket.getLength());
+                //Toast.makeText(mainactivity,message,Toast.LENGTH_LONG);
+                ((EditText)findViewById(R.id.editText2)).setText(message);
+            }
+        });
 
     }
 
@@ -334,6 +367,9 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
+    @Override
+    public void onDestroy(){
+        this.m_myNetworkHelper.keepInterfaceAllive = false;
+        super.onDestroy();
+    }
 }

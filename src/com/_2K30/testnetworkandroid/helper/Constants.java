@@ -19,5 +19,6 @@ public class Constants {
      * Default value for message
      */
     public static final String DEFAULT_MESSAGE_TO_SEND = "hello";
+    public  static  final String DEFAULT_CLIENT_MESSAGE = "CLIENT";
 	
 }

@@ -40,8 +40,7 @@
         android:autoText="false"
         android:editable="true"
         android:ems="10"
-        android:shadowColor="@android:color/background_dark"
-        android:shadowRadius="10"
+        android:textColor="@color/white"
         android:singleLine="false" 
         >
 
@@ -56,7 +55,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/server_external_ip"
-        android:editable="false"
+        android:editable="true"
+        android:textColor="@color/white"
         android:ems="10" />
 
     <TextView
