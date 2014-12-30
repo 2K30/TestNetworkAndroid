@@ -211,7 +211,7 @@ public class MyNetworkHelper {
      * @param server Server
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(final Client client, final Server server) throws NetworkHelperException, IOException {
+    public static void ConnectClientToServer(Client client,Server server) throws NetworkHelperException, IOException {
 
         if(client == null || server == null){
             throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
