@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
         GifRunCommon g = new GifRunCommon();
-        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -231,16 +231,21 @@ public class MainActivity extends Activity {
         });
 
         //now create connection between server and client
-        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
         final Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
         server.conManager = this.m_connectivityManager;
         client.conManager = this.m_connectivityManager;
+
+        final Server serverReceive  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final Client clientSender = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,serverReceive,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+
 
         MyRunnable keepConnectivity = new MyRunnable(Common.getMethodFromClass(MyNetworkHelper.class,"keepInterfaceAllive")[0],m_myNetworkHelper,mobileDataNetworkInterface,this.m_connectivityManager);
         MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
         keepAliveConnectivityThread.start();
 
         MyNetworkHelper.ConnectClientToServer(client,server);
+        //MyNetworkHelper.ConnectServerToClient(clientSender,serverReceive);
         ((Button)findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -249,6 +254,8 @@ public class MainActivity extends Activity {
                     public void run() {
                         try {
                             String message = ((EditText)findViewById(R.id.txt_client_to_server)).getText().toString();
+                            //clientSender.sendMessage(message);
+                            //client.sendMessage(message);
                             server.sendMessage(message,client);
                         } catch (IOException e) {
                             e.printStackTrace();

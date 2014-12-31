@@ -29,14 +29,16 @@ public class Client{
     private int m_clientPort = 0;
     private Client client = this;
     private DatagramSocket m_clientSocket = null;
-
+    private DatagramSocket m_clientSendSocket = null;
+    public boolean finished = false;
     private Method m_methodCallOnReceive = null;
     private Object m_methodCaller = null;
     public ConnectivityManager conManager;
     private MyAndroidThread m_MyAndroidThread = null;
     public int m_ServerPort = 0;
+    private int portTotest = 0;
     private InetAddress m_publicAddress;
-
+    private boolean breakUp;
     /**
      * Initialize client object with given address and port
      * @param address Internet address
@@ -88,7 +90,7 @@ public class Client{
                         public void run() {
 
                             byte[] receiveData = new byte[65508];
-
+                            int counter = 0;
                             while(!Thread.currentThread().isInterrupted()){
                                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                                 try {
@@ -98,7 +100,7 @@ public class Client{
                                     continue;
                                 }
                                 m_ServerPort = receivePacket.getPort();
-
+                                breakUp = true;
                                 if(m_methodCaller != null && m_methodCallOnReceive != null){
                                     try {
                                         m_methodCallOnReceive.invoke(m_methodCaller,receivePacket);
@@ -136,16 +138,31 @@ public class Client{
     public void sendMessage(String message) throws IOException {
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "enableHIPRI");
         InetAddress serverAddress = this.m_serverConnectedTo.getExternalAddress();
-        if(m_ServerPort == 0) {
+        //if(m_ServerPort == 0) {
             int serverPort = this.m_serverConnectedTo.getServerSocket().getLocalPort();//this.m_serverConnectedTo.getServerSocket().getPort();
-            for (serverPort = 1; serverPort < 65536; serverPort++) {
+           // for (serverPort = 1; serverPort < 65536; serverPort++) {
+                portTotest = serverPort;
                 DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, serverPort);
-                this.m_clientSocket.send(sendPacket);
-            }
-        }else{
-            DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, this.m_clientSocket.getLocalPort());
-            this.m_clientSocket.send(sendPacket);
-        }
+                    this.m_clientSocket.send(sendPacket);
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(breakUp){
+              //      break;
+                }
+            //}
+        //}else{
+            //this.sendMessageAsSender(message,serverAddress);
+        //}
+        this.finished = true;
+    }
+
+    private void sendMessageAsSender(String message,InetAddress serverAddress) throws IOException {
+        DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, m_ServerPort);
+        this.m_clientSocket.send(sendPacket);
     }
 
     /**
@@ -159,6 +176,8 @@ public class Client{
      * @return
      */
     public DatagramSocket getClientSocket(){return this.m_clientSocket;}
+
+    public DatagramSocket getClientReceiverSocket(){return this.m_clientSendSocket;}
 
     /**
      * Default handle on receive
@@ -184,6 +203,7 @@ public class Client{
         this.m_methodCallOnReceive = method;
         this.m_methodCaller = methodOwner;
 
+        this.m_clientSendSocket = new DatagramSocket(0,address);
 
         if(this.m_methodCallOnReceive != null){
             this.m_methodCallOnReceive.setAccessible(true);

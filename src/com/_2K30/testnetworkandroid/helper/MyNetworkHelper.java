@@ -177,7 +177,7 @@ public class MyNetworkHelper {
             connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
             this.getExternalIpOfInterface(networkInterface);
             try {
-                Thread.sleep(200);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -205,13 +205,36 @@ public class MyNetworkHelper {
 		return s_instanceOfMyNetworkHelper;
 	}
 
+    public static void ConnectServerToClient(final Client client, final Server server) throws NetworkHelperException,IOException{
+        if(client == null || server == null){
+            throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
+        }
+
+        server.startAsync();
+        client.startAsync();
+
+        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
+        new Thread(sendAsync).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!server.finished){
+                    //...
+                }
+                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+
+            }
+        }).start();
+    }
+
     /**
      * Create connection between server and client (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)
      * @param client Client which should connected to server
      * @param server Server
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(Client client,Server server) throws NetworkHelperException, IOException {
+    public static void ConnectClientToServer(final Client client,final Server server) throws NetworkHelperException, IOException {
 
         if(client == null || server == null){
             throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
@@ -221,12 +244,31 @@ public class MyNetworkHelper {
         client.startAsync();
 
         new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!client.finished){
+                    //...
+                }
+                MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
+                new Thread(sendAsync).start();
+            }
+        }).start();
 
-        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
-        new Thread(sendAsync).start();
-
-
-
+/*
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!client.finished && !server.finished){
+                    //wait...
+                }
+                //receiver
+                new Thread(new MyRunnable(Common.getMethodFromClass(Server.class,"initReceiver")[0],server,client)).start();
+                //sender
+                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+            }
+        }).start();
+*/
         //client.sendMessage();
 
         //server.sendMessage(client);

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 public class Server {
 
     private DatagramSocket m_server = null;
+    public DatagramSocket m_serverReceiverSocket = null;
     private ArrayList<DatagramSocket> m_listOfConnectedClients = null;
     private Method m_methodCallOnReceive = null;
     private Object m_methodCaller = null;
@@ -35,6 +36,8 @@ public class Server {
     private InetAddress m_publicAddress;
     public int portToTest = 0;
     public ConnectivityManager conManager;
+    public boolean finished = false;
+    private Client client;
     public Server (int port, InetAddress address,Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
       this.initializeServer(port,address,methodOnReceive,caller,publicAddress);
     }
@@ -50,15 +53,31 @@ public class Server {
      * @throws IOException
      */
     public void sendMessage(String message, Client client) throws IOException {
+        this.client = client;
         InetAddress clientAddress = client.getExternelAddress();
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
         int clientPort = client.getClientSocket().getLocalPort();//client.getClientSocket().getPort();
         //for( clientPort = 10000; clientPort <65535;clientPort++) {
+        //portToTest = client.m_ServerPort;
             DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
             this.m_server.send(sendPacket);
+        finished = true;
         //}
         //client.sendMessage();
     }
+
+    public void initReceiver(Client client) throws IOException {
+        InetAddress clientAddress = client.getExternelAddress();
+        //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+        int clientPort = client.getClientSocket().getLocalPort();//client.getClientSocket().getPort();
+        for( clientPort = 1; clientPort <65535;clientPort++) {
+            DatagramPacket sendPacket = new DatagramPacket(Constants.DEFAULT_MESSAGE_TO_SEND.getBytes(), Constants.DEFAULT_MESSAGE_TO_SEND.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
+            this.m_serverReceiverSocket.send(sendPacket);
+        }
+        //client.sendMessage();
+    }
+
+
 
     /**
      * Sends default message
@@ -93,7 +112,7 @@ public class Server {
                                 try {
 
                                     m_server.receive(receivePacket);
-
+                                    //client.m_ServerPort = receivePacket.getPort();
                                     //call given method for receive only if both elements(method and owner) are not equal null
                                     if (m_methodCallOnReceive != null && m_methodCaller != null) {
 
@@ -173,6 +192,7 @@ public class Server {
             //set remote call enable
             m_methodCallOnReceive.setAccessible(true);
         }
+        m_serverReceiverSocket = new DatagramSocket(0,address);
     }
 
     private synchronized void checkForStatesOfCliets(){
