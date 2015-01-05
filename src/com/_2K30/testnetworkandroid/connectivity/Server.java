@@ -26,6 +26,7 @@ import java.util.ArrayList;
 public class Server {
 
     private DatagramSocket m_server = null;
+    private InetAddress m_internalAddress = null;
     public DatagramSocket m_serverReceiverSocket = null;
     private ArrayList<DatagramSocket> m_listOfConnectedClients = null;
     private Method m_methodCallOnReceive = null;
@@ -52,7 +53,7 @@ public class Server {
      * @param message message to send
      * @throws IOException
      */
-    public void sendMessage(String message, Client client) throws IOException {
+    public synchronized void sendMessage(String message, Client client) throws IOException {
         this.client = client;
         InetAddress clientAddress = client.getExternelAddress();
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
@@ -155,11 +156,11 @@ public class Server {
     private void analyseIncomingPacketAndSaveSendingClient(DatagramPacket receivePacket) throws SocketException {
         InetAddress clientAddress = receivePacket.getAddress();
         int clientPort = receivePacket.getPort();
-        DatagramSocket clientSocket = new DatagramSocket(clientPort, clientAddress);
-
-        if (!m_listOfConnectedClients.contains(clientSocket)) {
+        //DatagramSocket clientSocket = new DatagramSocket(clientPort, clientAddress);
+        String message = new String(receivePacket.getData(),0,receivePacket.getLength());
+        /*if (!m_listOfConnectedClients.contains(clientSocket)) {
             m_listOfConnectedClients.add(clientSocket);
-        }
+        }*/
     }
 
     /**
@@ -175,7 +176,7 @@ public class Server {
     /**
      * Initialize server and other depended variables
      * @param port server port
-     * @param address   server address (public ip for accessibility from other networks or internet)
+     * @param address   internal address
      * @param methodOnReceive on that should call on receive
      * @param caller owner of method on receive
      * @throws SocketException
@@ -185,6 +186,7 @@ public class Server {
         this.m_methodCaller = caller;
         this.m_methodCallOnReceive = methodOnReceive;
         m_server = new DatagramSocket(port, address);
+        m_internalAddress = address;
         this.m_publicAddress = publicAddress;
         Thread.sleep(500);
         if (methodOnReceive != null && caller != null) {
@@ -214,5 +216,6 @@ public class Server {
 
     public InetAddress getExternalAddress(){return this.m_publicAddress;}
 
+    public InetAddress getInternalAddress(){return this.m_internalAddress;}
 
 }

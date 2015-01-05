@@ -177,7 +177,7 @@ public class MyNetworkHelper {
             connectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
             this.getExternalIpOfInterface(networkInterface);
             try {
-                Thread.sleep(500);
+                Thread.sleep(1200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -252,6 +252,31 @@ public class MyNetworkHelper {
                 }
                 MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
                 new Thread(sendAsync).start();
+                while(!server.finished){
+                    //...
+                }
+                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"SendspecialMessage")[0],client,Constants.DEFAULT_CLIENT_MESSAGE)).start();
+                Client mobDataClient = null;
+                Server wifiDataServer = null;
+                //try {
+                    //wifiDataServer = new Server(0,client.getInternalAddress(),client.getExternelAddress());
+                    //mobDataClient = new Client(server.getInternalAddress(),0,wifiDataServer,server.getExternalAddress());
+
+                /*} catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+               // new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],mobDataClient)).start();
+               // while (!mobDataClient.finished){
+                    //... wait
+                //}
+
+                //new Thread(new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],wifiDataServer,mobDataClient)).start();
+
             }
         }).start();
 

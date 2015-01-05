@@ -8,7 +8,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
-
 import com._2K30.testnetworkadndroid.common.*;
 import com._2K30.testnetworkadndroid.common.MyRunnable;
 import com._2K30.testnetworkandroid.connectivity.*;
@@ -33,7 +32,6 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 
 public class MainActivity extends Activity {
@@ -67,8 +65,8 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
-        GifRunCommon g = new GifRunCommon();
-        g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        //GifRunCommon g = new GifRunCommon();
+        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -214,7 +212,8 @@ public class MainActivity extends Activity {
 
         //create a overwritten runnable object, with action method on calling run().
             MyRunnable myRunnableSetText = new MyRunnable(methods[0],
-                                                            this,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
+                                                            this,
+                                                            m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface).getHostAddress(),
                                                             m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface).getHostAddress(),
                                                             m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface),
                                                             m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface));
@@ -231,8 +230,8 @@ public class MainActivity extends Activity {
         });
 
         //now create connection between server and client
-        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
-        final Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
         server.conManager = this.m_connectivityManager;
         client.conManager = this.m_connectivityManager;
 
@@ -245,22 +244,25 @@ public class MainActivity extends Activity {
         keepAliveConnectivityThread.start();
 
         MyNetworkHelper.ConnectClientToServer(client,server);
+
+
+
         //MyNetworkHelper.ConnectServerToClient(clientSender,serverReceive);
-        ((Button)findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
+                ((Button) findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            String message = ((EditText)findViewById(R.id.txt_client_to_server)).getText().toString();
+                            String message = ((EditText) findViewById(R.id.txt_client_to_server)).getText().toString();
                             //clientSender.sendMessage(message);
                             //client.sendMessage(message);
-                            server.sendMessage(message,client);
+                            //server.sendMessage(message, client);
+                            client.SendspecialMessage(message);
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }
-                        catch (Exception ex){
+                        } catch (Exception ex) {
                             ex.printStackTrace();
                         }
                     }

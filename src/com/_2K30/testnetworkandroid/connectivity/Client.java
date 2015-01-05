@@ -135,7 +135,7 @@ public class Client{
      * @param message message to send
      * @throws IOException
      */
-    public void sendMessage(String message) throws IOException {
+    public synchronized void sendMessage(String message) throws IOException {
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "enableHIPRI");
         InetAddress serverAddress = this.m_serverConnectedTo.getExternalAddress();
         //if(m_ServerPort == 0) {
@@ -160,6 +160,30 @@ public class Client{
         this.finished = true;
     }
 
+    public void SendspecialMessage(String message) throws IOException {
+        InetAddress serverAddress = this.m_serverConnectedTo.getExternalAddress();
+        //if(m_ServerPort == 0) {
+        int serverPort = m_ServerPort;//this.m_serverConnectedTo.getServerSocket().getLocalPort();//this.m_serverConnectedTo.getServerSocket().getPort();
+         //for (serverPort = m_ServerPort; serverPort < 65536; serverPort++) {
+                portTotest = serverPort;
+                DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, serverPort);
+                this.m_clientSocket.send(sendPacket);
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(breakUp){
+                    //      break;
+                }
+        //}
+        //}else{
+        //this.sendMessageAsSender(message,serverAddress);
+        //}
+        this.finished = true;
+    }
+
     private void sendMessageAsSender(String message,InetAddress serverAddress) throws IOException {
         DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, m_ServerPort);
         this.m_clientSocket.send(sendPacket);
@@ -170,6 +194,8 @@ public class Client{
      * @throws IOException
      */
     public void sendMessage() throws IOException {this.sendMessage(Constants.DEFAULT_CLIENT_MESSAGE);}
+
+    public InetAddress getInternalAddress(){return this.m_clientInetAddress;}
 
     /**
      * Return the Client socket
