@@ -256,8 +256,6 @@ public class MyNetworkHelper {
                     //...
                 }
                 new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"SendspecialMessage")[0],client,Constants.DEFAULT_CLIENT_MESSAGE)).start();
-                Client mobDataClient = null;
-                Server wifiDataServer = null;
                 //try {
                     //wifiDataServer = new Server(0,client.getInternalAddress(),client.getExternelAddress());
                     //mobDataClient = new Client(server.getInternalAddress(),0,wifiDataServer,server.getExternalAddress());

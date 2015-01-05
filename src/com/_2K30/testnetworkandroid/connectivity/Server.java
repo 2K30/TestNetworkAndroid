@@ -135,7 +135,7 @@ public class Server {
                             }//end while
                         }//void run()
                     }
-            );
+            ); 
             m_MyAndroidThread.start();
         }
         else{
