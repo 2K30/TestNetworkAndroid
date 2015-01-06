@@ -1,5 +1,10 @@
 package com._2K30.testnetworkadndroid.common;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,6 +30,7 @@ public class Common {
         }
         return array.toArray(new Method[array.size()]);
     }
+
 
     /**
      * Copies ArrayList to Array[]

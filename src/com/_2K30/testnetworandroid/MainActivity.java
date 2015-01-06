@@ -18,9 +18,13 @@ import com.example.testnetworandroid.R;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,19 +58,17 @@ public class MainActivity extends Activity {
 	private Activity mainactivity = null;
 
     private boolean m_enableToUsePreload = false;
-
 	private ArrayList<NetworkInterface> m_listOfNetworkInterfaces;
-	
-	
-	
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.mainContext = this;
         setContentView(R.layout.activity_main);
+
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
-        GifRunCommon g = new GifRunCommon();
-        g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        //GifRunCommon g = new GifRunCommon();
+        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -99,7 +101,6 @@ public class MainActivity extends Activity {
         try {
 
             m_myNetworkHelper.enableMobileData(true, this.m_connectivityManager, this);
-
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -370,9 +371,21 @@ public class MainActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+
+        switch (id){
+            case R.id.action_settings:
+                return true;
+            case R.id.turn_on_gps:
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+                return true;
+            case R.id.start_stream:
+                return true;
+            case R.id.turn_off_gps:
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 

@@ -7,5 +7,22 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
+    <item
+        android:id="@+id/turn_on_gps"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_gps_on"/>
+        />
+    <item
+        android:id="@+id/turn_off_gps"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_gps_off"/>
 
+    <item
+        android:id="@+id/start_stream"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_start_stream"/>
+    />
 </menu>

@@ -4,5 +4,7 @@
     <string name="app_name">TestNetworAndroid</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
+    <string name="action_gps_on">GPS -> ON</string>
+    <string name="action_gps_off">GPS -> OFF</string>
+    <string name="action_start_stream">Start stream!</string>
 </resources>
