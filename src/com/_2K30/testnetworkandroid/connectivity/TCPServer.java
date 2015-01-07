@@ -8,6 +8,8 @@ import java.net.Socket;
 /**
  * Created by kko on 07.01.2015.
  */
+
+//TODO try to connect to target over targetInternPort+X<=maxPort. if not try reverse way port+x<targetInternPort
 public class TCPServer {
 
     private ServerSocket m_tcpServerSocket = null;
