@@ -261,7 +261,24 @@ public class MyNetworkHelper {
                 while(!server.finished){
                     //...
                 }
-                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"SendspecialMessage")[0],client,Constants.DEFAULT_CLIENT_MESSAGE)).start();
+
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            client.SendspecialMessage(Constants.DEFAULT_CLIENT_MESSAGE);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+
+                //new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"SendspecialMessage")[0],client,Constants.DEFAULT_CLIENT_MESSAGE)).start();
+                //create client for mobile data and send message to server, and back
+
+
+
                 Client mobDataClient = null;
                 Server wifiDataServer = null;
                 //try {
