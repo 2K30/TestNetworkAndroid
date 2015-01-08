@@ -1,6 +1,7 @@
 package com._2K30.testnetworkandroid.connectivity;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -28,7 +29,7 @@ public class TCPServer {
      */
     public TCPServer(InetAddress internalAddress, InetAddress externalAddress, int port) throws IOException {
 
-        this.fillMemeber(internalAddress, externalAddress, new ServerSocket(port, 0, internalAddress));
+        this.fillMemeber(internalAddress, externalAddress, new ServerSocket(port,-1, internalAddress));
     }
 
 
@@ -41,11 +42,13 @@ public class TCPServer {
         this.m_tcpServerSocket = serverSocket;
         this.m_externalAddress = externalAddress;
         this.m_internalAddress = internalAddress;
+
     }
 
     public void tryToBindToTargetSocket(InetAddress targetAddress, int targetPort){
 
     }
+
 
     public void start() throws IOException {
         while(true) {

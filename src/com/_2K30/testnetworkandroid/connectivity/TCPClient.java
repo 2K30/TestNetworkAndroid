@@ -26,19 +26,52 @@ public class TCPClient {
         this.m_serverPort = destinationPort;
         //create socket
         try {
-            m_mySocket = new Socket(m_internalAddress,0);
+            m_mySocket = new Socket(m_internalAddress,4444);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void tryToConnectToTargetAddress() throws IOException {
-        m_mySocket.connect(new InetSocketAddress(m_serverDestination,m_serverPort));
+    public void tryToConnectToTargetAddress() throws IOException {
+        try {
+            InetSocketAddress address = new InetSocketAddress(m_serverDestination, m_serverPort);
+            if(m_mySocket == null){
+                m_mySocket = new Socket(m_serverDestination,m_serverPort);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
+    public void tryToConnectToTargetAddress(InetAddress Inetaddress,int port) throws IOException {
+            InetSocketAddress address = new InetSocketAddress(Inetaddress, port);
+            if(m_mySocket == null){
+                m_mySocket = new Socket(Inetaddress,port);
+            }
+    }
 
-    public void startBindingToServer(){
-        //
+    public void tryToConnetOnAllPorts(InetAddress address){
+        int localPort = -1;
+        try {
+            ServerSocket ss = new ServerSocket(0,0,this.m_internalAddress);
+            localPort = ss.getLocalPort();
+            ss.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(int i = 1; i < 65536; i++){
+            try {
+                m_mySocket = new Socket(address,i,this.m_internalAddress,localPort);
+                Thread.sleep(100);
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        return;
     }
 
     public InetAddress getInternalAddress(){
@@ -54,6 +87,9 @@ public class TCPClient {
     }
 
     public void closeClient() throws IOException {
+        if (this.m_mySocket == null) {
+            return;
+        }
         this.m_mySocket.close();
         this.m_mySocket.notify();
     }

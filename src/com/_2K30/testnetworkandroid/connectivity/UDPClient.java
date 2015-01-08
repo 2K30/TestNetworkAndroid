@@ -156,6 +156,29 @@ public class UDPClient {
         this.finished = true;
     }
 
+    public synchronized void sendMessageForAllPorts(String message){
+        InetAddress serverAddress = this.m_UDP_serverConnectedTo.getExternalAddress();
+        int serverPort = this.m_UDP_serverConnectedTo.getServerSocket().getLocalPort();
+
+        for(int i = serverPort; i < 65536; i++){
+            DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, i);
+            try {
+                this.m_clientSocket.send(sendPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //send reverse
+        for(int i = 1; i < serverPort; i++){
+            DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, i);
+            try {
+                this.m_clientSocket.send(sendPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void SendspecialMessage(String message) throws IOException {
         InetAddress serverAddress = this.m_UDP_serverConnectedTo.getExternalAddress();
         //if(m_ServerPort == 0) {

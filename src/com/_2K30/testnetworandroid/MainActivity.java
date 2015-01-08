@@ -244,8 +244,10 @@ public class MainActivity extends Activity {
 
         //MyNetworkHelper.ConnectUDPClientUDPToServer(UDPClient, UDPServer);
 
+
         MyNetworkHelper.ConnectTCPClientToTCPServer(new TCPClient(UDPClient.getInternalAddress(),UDPClient.getExternelAddress(),UDPServer.getExternalAddress(),433),
-                                                    new TCPClient(UDPServer.getInternalAddress(),UDPServer.getExternalAddress(),UDPClient.getExternelAddress(),433));
+                                                    new TCPClient(UDPServer.getInternalAddress(),UDPServer.getExternalAddress(),UDPClient.getExternelAddress(),433),
+                                                    UDPClient,UDPServer);
 
 
 

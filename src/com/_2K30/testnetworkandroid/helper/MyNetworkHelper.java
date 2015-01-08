@@ -207,43 +207,46 @@ public class MyNetworkHelper {
 	}
 
 
-    public static void ConnectTCPClientToTCPServer(final TCPClient wifiClient, final TCPClient mobileDataClient) throws NetworkHelperException {
+    public static void ConnectTCPClientToTCPServer(final TCPClient wifiClient, final TCPClient mobileDataClient, final UDPClient udpClient,final UDPServer udpServer) throws NetworkHelperException {
+        //this kind of punching not working!!! in case if udp ports are blocked, no one package will go out and come in!
+        // possible solution, use extra server with public ip and one open port. connect via TCP Socket. After connection transmit both ips and ports to each client for p2p connection.
+        //maybe best solution use ssl port on server to come always out through firewall.
 
-        if(wifiClient == null || mobileDataClient == null){
+       /* if (wifiClient == null || mobileDataClient == null) {
             throw new NetworkHelperException("TCPClient client is null!!!");
         }
+        else if(udpClient == null || udpServer == null){
+            throw new NetworkHelperException("UDP client or UDPServer is null!!!");
+        }
+
+        udpClient.startAsync();
+        udpServer.startAsync();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                wifiClient.startBindingToServer();
-                mobileDataClient.startBindingToServer();
-                int serverPort = wifiClient.getLocalPort();
-                InetAddress internalAddressWifi = wifiClient.getInternalAddress();
-                InetAddress externalAddressWifi = wifiClient.getExternalAddress();
+
                 try {
-                    wifiClient.closeClient();
+
+                    udpServer.sendMessage(udpClient);
+                    udpClient.sendMessageForAllPorts("tadaaa");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                TCPServer wifiServer = null;
+                final int wifiPort = udpClient.getClientSocket().getLocalPort();
+                final int mobilePort = udpServer.getServerSocket().getLocalPort();
 
-                try {
-                     wifiServer = new TCPServer(internalAddressWifi,externalAddressWifi,serverPort);
-                     wifiServer.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
 
             }
-        }).start();
+        }).start();*/
 
     }
 
     /**
      * Create connection between UDPServer and UDPClient (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)
+     * This method works only if UDP connection enable in this network! Otherwise this method is useless
      * @param UDPClient UDPClient which should connected to UDPServer
      * @param UDPServer UDPServer
      * @throws NetworkHelperException
@@ -285,49 +288,7 @@ public class MyNetworkHelper {
                 //new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"SendspecialMessage")[0],UDPClient,Constants.DEFAULT_CLIENT_MESSAGE)).start();
                 //create UDPClient for mobile data and send message to UDPServer, and back
 
-
-
-                UDPClient mobDataUDPClient = null;
-                UDPServer wifiDataUDPServer = null;
-                //try {
-                    //wifiDataUDPServer = new UDPServer(0,UDPClient.getInternalAddress(),UDPClient.getExternelAddress());
-                    //mobDataUDPClient = new UDPClient(UDPServer.getInternalAddress(),0,wifiDataUDPServer,UDPServer.getExternalAddress());
-
-                /*} catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-
-               // new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0],mobDataUDPClient)).start();
-               // while (!mobDataUDPClient.finished){
-                    //... wait
-                //}
-
-                //new Thread(new MyRunnable(Common.getMethodFromClass(UDPServer.class,"sendMessage")[0],wifiDataUDPServer,mobDataUDPClient)).start();
-
             }
         }).start();
-
-/*
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(!UDPClient.finished && !UDPServer.finished){
-                    //wait...
-                }
-                //receiver
-                new Thread(new MyRunnable(Common.getMethodFromClass(UDPServer.class,"initReceiver")[0],UDPServer,UDPClient)).start();
-                //sender
-                new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0],UDPClient)).start();
-            }
-        }).start();
-*/
-        //UDPClient.sendMessage();
-
-        //UDPServer.sendMessage(UDPClient);
-        //UDPClient.sendMessage("Ist das angekoemmon?");
     }
 }

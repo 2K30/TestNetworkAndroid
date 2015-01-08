@@ -34,6 +34,7 @@ public class UDPServer {
     public ConnectivityManager conManager;
     public boolean finished = false;
     private UDPClient UDPClient;
+
     public UDPServer(int port, InetAddress address, Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
       this.initializeServer(port,address,methodOnReceive,caller,publicAddress);
     }
@@ -53,27 +54,14 @@ public class UDPServer {
         InetAddress clientAddress = UDPClient.getExternelAddress();
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
         int clientPort = UDPClient.getClientSocket().getLocalPort();//UDPClient.getClientSocket().getPort();
-        //for( clientPort = 10000; clientPort <65535;clientPort++) {
-        //portToTest = UDPClient.m_ServerPort;
-            DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
-            this.m_server.send(sendPacket);
+        //for( clientPort = 1; clientPort <65536;clientPort++) {
+        portToTest = UDPClient.m_ServerPort;
+        DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, clientAddress, (portToTest == 0 ? clientPort : portToTest));
+        this.m_server.send(sendPacket);
         finished = true;
         //}
         //UDPClient.sendMessage();
     }
-
-    public void initReceiver(UDPClient UDPClient) throws IOException {
-        InetAddress clientAddress = UDPClient.getExternelAddress();
-        //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
-        int clientPort = UDPClient.getClientSocket().getLocalPort();//UDPClient.getClientSocket().getPort();
-        for( clientPort = 1; clientPort <65535;clientPort++) {
-            DatagramPacket sendPacket = new DatagramPacket(Constants.DEFAULT_MESSAGE_TO_SEND.getBytes(), Constants.DEFAULT_MESSAGE_TO_SEND.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
-            this.m_serverReceiverSocket.send(sendPacket);
-        }
-        //UDPClient.sendMessage();
-    }
-
-
 
     /**
      * Sends default message
