@@ -47,6 +47,14 @@ public class TCPServer {
 
     }
 
+    public void start() throws IOException {
+        while(true) {
+            Socket connectedClient = m_tcpServerSocket.accept();
+            String s = "";
+            s = "Acceped!";
+        }
+    }
+
     /**
      * Local port
      * @return

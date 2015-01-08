@@ -2,6 +2,7 @@ package com._2K30.testnetworkandroid.connectivity;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -23,16 +24,38 @@ public class TCPClient {
         this.m_externalAddress = publicAddress;
         this.m_serverDestination = serverDestination;
         this.m_serverPort = destinationPort;
+        //create socket
+        try {
+            m_mySocket = new Socket(m_internalAddress,0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void tryToConnectToTargetAddress() throws IOException {
+        m_mySocket.connect(new InetSocketAddress(m_serverDestination,m_serverPort));
     }
 
 
     public void startBindingToServer(){
         //
-        try {
-            m_mySocket = new Socket(m_serverDestination,m_serverPort,this.m_internalAddress,0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    }
+
+    public InetAddress getInternalAddress(){
+        return this.m_internalAddress;
+    }
+
+    public InetAddress getExternalAddress(){
+        return  this.m_externalAddress;
+    }
+
+    public int getLocalPort(){
+       return this.m_mySocket.getLocalPort();
+    }
+
+    public void closeClient() throws IOException {
+        this.m_mySocket.close();
+        this.m_mySocket.notify();
     }
 
 }

@@ -206,27 +206,40 @@ public class MyNetworkHelper {
 		return s_instanceOfMyNetworkHelper;
 	}
 
-    public static void ConnectServerToClient(final UDPClient UDPClient, final UDPServer UDPServer) throws NetworkHelperException,IOException{
-        if(UDPClient == null || UDPServer == null){
-            throw new NetworkHelperException("UDPClient or UDPServer is NULL!! Can not connect UDPServer and UDPClient!");
+
+    public static void ConnectTCPClientToTCPServer(final TCPClient wifiClient, final TCPClient mobileDataClient) throws NetworkHelperException {
+
+        if(wifiClient == null || mobileDataClient == null){
+            throw new NetworkHelperException("TCPClient client is null!!!");
         }
-
-        UDPServer.startAsync();
-        UDPClient.startAsync();
-
-        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(UDPServer.class,"sendMessage")[0], UDPServer, UDPClient);
-        new Thread(sendAsync).start();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!UDPServer.finished){
-                    //...
+                wifiClient.startBindingToServer();
+                mobileDataClient.startBindingToServer();
+                int serverPort = wifiClient.getLocalPort();
+                InetAddress internalAddressWifi = wifiClient.getInternalAddress();
+                InetAddress externalAddressWifi = wifiClient.getExternalAddress();
+                try {
+                    wifiClient.closeClient();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0], UDPClient)).start();
+
+                TCPServer wifiServer = null;
+
+                try {
+                     wifiServer = new TCPServer(internalAddressWifi,externalAddressWifi,serverPort);
+                     wifiServer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
 
             }
         }).start();
+
     }
 
     /**
@@ -235,7 +248,7 @@ public class MyNetworkHelper {
      * @param UDPServer UDPServer
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(final UDPClient UDPClient,final UDPServer UDPServer) throws NetworkHelperException, IOException {
+    public static void ConnectUDPClientUDPToServer(final UDPClient UDPClient,final UDPServer UDPServer) throws NetworkHelperException, IOException {
 
         if(UDPClient == null || UDPServer == null){
             throw new NetworkHelperException("UDPClient or UDPServer is NULL!! Can not connect UDPServer and UDPClient!");
