@@ -20,9 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -133,7 +131,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void run() {
                     TextView txt = (TextView) findViewById(R.id.server_text);
-                    txt.setText("IP of Server: DISCONNECTED!");
+                    txt.setText("IP of UDPServer: DISCONNECTED!");
                 }
             });
 
@@ -147,7 +145,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void run() {
                     TextView txt = (TextView) findViewById(R.id.client_text);
-                    txt.setText("IP of Client: DISCONNECTED!");
+                    txt.setText("IP of UDPClient: DISCONNECTED!");
                 }
             });
         }
@@ -230,25 +228,25 @@ public class MainActivity extends Activity {
             }
         });
 
-        //now create connection between server and client
-        final Server server  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
-        final Client client = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,server,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
-        server.conManager = this.m_connectivityManager;
-        client.conManager = this.m_connectivityManager;
+        //now create connection between UDPServer and UDPClient
+        final UDPServer UDPServer = new UDPServer(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final UDPClient UDPClient = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0, UDPServer,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        UDPServer.conManager = this.m_connectivityManager;
+        UDPClient.conManager = this.m_connectivityManager;
 
-        final Server serverReceive  = new Server(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
-        final Client clientSender = new Client(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0,serverReceive,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        final UDPServer UDPServerReceive = new UDPServer(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+        final UDPClient UDPClientSender = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0, UDPServerReceive,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
 
 
         MyRunnable keepConnectivity = new MyRunnable(Common.getMethodFromClass(MyNetworkHelper.class,"keepInterfaceAllive")[0],m_myNetworkHelper,mobileDataNetworkInterface,this.m_connectivityManager);
         MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
         keepAliveConnectivityThread.start();
 
-        MyNetworkHelper.ConnectClientToServer(client,server);
+        MyNetworkHelper.ConnectClientToServer(UDPClient, UDPServer);
 
 
 
-        //MyNetworkHelper.ConnectServerToClient(clientSender,serverReceive);
+        //MyNetworkHelper.ConnectServerToClient(UDPClientSender,UDPServerReceive);
                 ((Button) findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -257,10 +255,10 @@ public class MainActivity extends Activity {
                     public void run() {
                         try {
                             String message = ((EditText) findViewById(R.id.txt_client_to_server)).getText().toString();
-                            //clientSender.sendMessage(message);
-                            //client.sendMessage(message);
-                            //server.sendMessage(message, client);
-                            client.SendspecialMessage(message);
+                            //UDPClientSender.sendMessage(message);
+                            //UDPClient.sendMessage(message);
+                            //UDPServer.sendMessage(message, UDPClient);
+                            UDPClient.SendspecialMessage(message);
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (Exception ex) {
@@ -279,14 +277,14 @@ public class MainActivity extends Activity {
 
             //check does WIFI network interface has two addresses:
 
-            txtClientInternal.setText("IP of Client: " + internalIpOfClient);
-            txtServerInternal.setText("IP of Server: " + internalIpOfServer);
+            txtClientInternal.setText("IP of UDPClient: " + internalIpOfClient);
+            txtServerInternal.setText("IP of UDPServer: " + internalIpOfServer);
 
             TextView txtServerExternalIp = (TextView) findViewById(R.id.client_external_ip_text);
             TextView txtClientExternalIp = (TextView) findViewById(R.id.server_external_ip);
 
-            txtServerExternalIp.setText("External IP of Client: " + externalIpOfClient);
-            txtClientExternalIp.setText("External IP of Server: " + externalIpOfServer);
+            txtServerExternalIp.setText("External IP of UDPClient: " + externalIpOfClient);
+            txtClientExternalIp.setText("External IP of UDPServer: " + externalIpOfServer);
     }
 
     private void showBootAnimation(boolean show){

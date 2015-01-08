@@ -11,19 +11,14 @@ import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 
 /**
  * Created by 2K30 on 16.12.2014.
  * @author 2K30
  */
-public class Server {
+public class UDPServer {
 
     private DatagramSocket m_server = null;
     private InetAddress m_internalAddress = null;
@@ -38,12 +33,12 @@ public class Server {
     public int portToTest = 0;
     public ConnectivityManager conManager;
     public boolean finished = false;
-    private Client client;
-    public Server (int port, InetAddress address,Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
+    private UDPClient UDPClient;
+    public UDPServer(int port, InetAddress address, Method methodOnReceive, Object caller, InetAddress publicAddress) throws IOException, InterruptedException {
       this.initializeServer(port,address,methodOnReceive,caller,publicAddress);
     }
 
-    public Server(int port, InetAddress address,InetAddress publicAddress) throws IOException, InterruptedException {
+    public UDPServer(int port, InetAddress address, InetAddress publicAddress) throws IOException, InterruptedException {
 
        this.initializeServer(port,address,publicAddress);
     }
@@ -53,29 +48,29 @@ public class Server {
      * @param message message to send
      * @throws IOException
      */
-    public synchronized void sendMessage(String message, Client client) throws IOException {
-        this.client = client;
-        InetAddress clientAddress = client.getExternelAddress();
+    public synchronized void sendMessage(String message, UDPClient UDPClient) throws IOException {
+        this.UDPClient = UDPClient;
+        InetAddress clientAddress = UDPClient.getExternelAddress();
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
-        int clientPort = client.getClientSocket().getLocalPort();//client.getClientSocket().getPort();
+        int clientPort = UDPClient.getClientSocket().getLocalPort();//UDPClient.getClientSocket().getPort();
         //for( clientPort = 10000; clientPort <65535;clientPort++) {
-        //portToTest = client.m_ServerPort;
+        //portToTest = UDPClient.m_ServerPort;
             DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
             this.m_server.send(sendPacket);
         finished = true;
         //}
-        //client.sendMessage();
+        //UDPClient.sendMessage();
     }
 
-    public void initReceiver(Client client) throws IOException {
-        InetAddress clientAddress = client.getExternelAddress();
+    public void initReceiver(UDPClient UDPClient) throws IOException {
+        InetAddress clientAddress = UDPClient.getExternelAddress();
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
-        int clientPort = client.getClientSocket().getLocalPort();//client.getClientSocket().getPort();
+        int clientPort = UDPClient.getClientSocket().getLocalPort();//UDPClient.getClientSocket().getPort();
         for( clientPort = 1; clientPort <65535;clientPort++) {
             DatagramPacket sendPacket = new DatagramPacket(Constants.DEFAULT_MESSAGE_TO_SEND.getBytes(), Constants.DEFAULT_MESSAGE_TO_SEND.getBytes().length, clientAddress, (portToTest==0?clientPort:portToTest));
             this.m_serverReceiverSocket.send(sendPacket);
         }
-        //client.sendMessage();
+        //UDPClient.sendMessage();
     }
 
 
@@ -84,8 +79,8 @@ public class Server {
      * Sends default message
      * @throws IOException
      */
-    public void sendMessage(Client client) throws IOException {
-        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND, client);
+    public void sendMessage(UDPClient UDPClient) throws IOException {
+        this.sendMessage(Constants.DEFAULT_MESSAGE_TO_SEND, UDPClient);
     }
 
     public void stop() {
@@ -113,7 +108,7 @@ public class Server {
                                 try {
 
                                     m_server.receive(receivePacket);
-                                    //client.m_ServerPort = receivePacket.getPort();
+                                    //UDPClient.m_ServerPort = receivePacket.getPort();
                                     //call given method for receive only if both elements(method and owner) are not equal null
                                     if (m_methodCallOnReceive != null && m_methodCaller != null) {
 
@@ -149,7 +144,7 @@ public class Server {
     }
 
     /**
-     * Analyzed the package and remember connected client
+     * Analyzed the package and remember connected UDPClient
      * @param receivePacket packet
      * @throws SocketException
      */
@@ -198,7 +193,7 @@ public class Server {
     }
 
     private synchronized void checkForStatesOfCliets(){
-      //TODO: implement logic for tests of connected clients. Some thing like thread for client 10 clients, running 10 check threads.
+      //TODO: implement logic for tests of connected clients. Some thing like thread for UDPClient 10 clients, running 10 check threads.
     }
 
     private synchronized void actionOnClietDisconnected(){

@@ -1,7 +1,6 @@
 package com._2K30.testnetworkandroid.connectivity;
 
 import android.net.ConnectivityManager;
-import android.widget.Toast;
 
 import com._2K30.testnetworkadndroid.common.MyAndroidThread;
 import com._2K30.testnetworkandroid.helper.Constants;
@@ -12,22 +11,19 @@ import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.channels.SocketChannel;
 
 /**
  * Created by 2K30 on 16.12.2014.
  * @author 2K30
  */
-public class Client{
+public class UDPClient {
 
 
     private InetAddress m_clientInetAddress = null;
-    private Server m_serverConnectedTo = null;
+    private UDPServer m_UDP_serverConnectedTo = null;
     private int m_clientPort = 0;
-    private Client client = this;
+    private UDPClient UDPClient = this;
     private DatagramSocket m_clientSocket = null;
     private DatagramSocket m_clientSendSocket = null;
     public boolean finished = false;
@@ -40,34 +36,34 @@ public class Client{
     private InetAddress m_publicAddress;
     private boolean breakUp;
     /**
-     * Initialize client object with given address and port
+     * Initialize UDPClient object with given address and port
      * @param address Internet address
      * @param port port
      */
-    public Client(InetAddress address, int port, InetAddress publicAddress) throws SocketException, InterruptedException {
+    public UDPClient(InetAddress address, int port, InetAddress publicAddress) throws SocketException, InterruptedException {
         this.initializeClient(address,port,null,null,null,publicAddress);
     }
 
     /**
-     * Initialize client object with given address, port and Server connecting to
+     * Initialize UDPClient object with given address, port and UDPServer connecting to
      * @param address Internet address
      * @param port port
-     * @param server Server connecting to
+     * @param UDPServer UDPServer connecting to
      */
-    public Client(InetAddress address, int port, Server server, InetAddress publicAddress) throws SocketException, InterruptedException {
-        this.initializeClient(address,port,server,null,null,publicAddress);
+    public UDPClient(InetAddress address, int port, UDPServer UDPServer, InetAddress publicAddress) throws SocketException, InterruptedException {
+        this.initializeClient(address,port, UDPServer,null,null,publicAddress);
     }
 
     /**
-     * Initialize client object with given address, port, server connecting to and method which should be called on data received from server, owner of receive method
+     * Initialize UDPClient object with given address, port, UDPServer connecting to and method which should be called on data received from UDPServer, owner of receive method
      * @param address Internet address
      * @param port Port
-     * @param server Server connecting to
-     * @param methodToCall on message receive from server
+     * @param UDPServer UDPServer connecting to
+     * @param methodToCall on message receive from UDPServer
      * @param owner owner of method which should be called on received data
      */
-    public Client(InetAddress address, int port, Server server, Method methodToCall, Object owner, InetAddress publicAddress) throws SocketException, InterruptedException {
-        this.initializeClient(address, port, server, methodToCall, owner, publicAddress);
+    public UDPClient(InetAddress address, int port, UDPServer UDPServer, Method methodToCall, Object owner, InetAddress publicAddress) throws SocketException, InterruptedException {
+        this.initializeClient(address, port, UDPServer, methodToCall, owner, publicAddress);
     }
 
 
@@ -137,9 +133,9 @@ public class Client{
      */
     public synchronized void sendMessage(String message) throws IOException {
         //this.conManager.startUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "enableHIPRI");
-        InetAddress serverAddress = this.m_serverConnectedTo.getExternalAddress();
+        InetAddress serverAddress = this.m_UDP_serverConnectedTo.getExternalAddress();
         //if(m_ServerPort == 0) {
-            int serverPort = this.m_serverConnectedTo.getServerSocket().getLocalPort();//this.m_serverConnectedTo.getServerSocket().getPort();
+            int serverPort = this.m_UDP_serverConnectedTo.getServerSocket().getLocalPort();//this.m_UDP_serverConnectedTo.getServerSocket().getPort();
            // for (serverPort = 1; serverPort < 65536; serverPort++) {
                 portTotest = serverPort;
                 DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, serverPort);
@@ -161,9 +157,9 @@ public class Client{
     }
 
     public void SendspecialMessage(String message) throws IOException {
-        InetAddress serverAddress = this.m_serverConnectedTo.getExternalAddress();
+        InetAddress serverAddress = this.m_UDP_serverConnectedTo.getExternalAddress();
         //if(m_ServerPort == 0) {
-        int serverPort = m_ServerPort;//this.m_serverConnectedTo.getServerSocket().getLocalPort();//this.m_serverConnectedTo.getServerSocket().getPort();
+        int serverPort = m_ServerPort;//this.m_UDP_serverConnectedTo.getServerSocket().getLocalPort();//this.m_UDP_serverConnectedTo.getServerSocket().getPort();
          //for (serverPort = m_ServerPort; serverPort < 65536; serverPort++) {
                 portTotest = serverPort;
                 DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, serverAddress, serverPort);
@@ -198,7 +194,7 @@ public class Client{
     public InetAddress getInternalAddress(){return this.m_clientInetAddress;}
 
     /**
-     * Return the Client socket
+     * Return the UDPClient socket
      * @return
      */
     public DatagramSocket getClientSocket(){return this.m_clientSocket;}
@@ -216,7 +212,7 @@ public class Client{
 
     public InetAddress getExternelAddress(){return this.m_publicAddress;}
 
-    private void initializeClient(InetAddress address,int port, Server server, Method method, Object methodOwner,InetAddress publicAddress) throws SocketException, InterruptedException {
+    private void initializeClient(InetAddress address,int port, UDPServer UDPServer, Method method, Object methodOwner,InetAddress publicAddress) throws SocketException, InterruptedException {
 
         this.m_clientInetAddress = address;
         this.m_clientSocket = new DatagramSocket(port, address);
@@ -224,7 +220,7 @@ public class Client{
         Thread.sleep(500);
         //m_clientSocket.bind(socketAddress);
         this.m_clientPort = this.m_clientSocket.getLocalPort();
-        this.m_serverConnectedTo = server;
+        this.m_UDP_serverConnectedTo = UDPServer;
 
         this.m_methodCallOnReceive = method;
         this.m_methodCaller = methodOwner;

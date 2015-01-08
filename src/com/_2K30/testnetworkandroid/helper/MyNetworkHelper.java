@@ -16,12 +16,7 @@ import org.apache.http.conn.util.InetAddressUtils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.os.Bundle;
-import android.os.PowerManager;
 
 import com._2K30.testnetworkadndroid.common.Common;
 import com._2K30.testnetworkadndroid.common.MyRunnable;
@@ -211,54 +206,54 @@ public class MyNetworkHelper {
 		return s_instanceOfMyNetworkHelper;
 	}
 
-    public static void ConnectServerToClient(final Client client, final Server server) throws NetworkHelperException,IOException{
-        if(client == null || server == null){
-            throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
+    public static void ConnectServerToClient(final UDPClient UDPClient, final UDPServer UDPServer) throws NetworkHelperException,IOException{
+        if(UDPClient == null || UDPServer == null){
+            throw new NetworkHelperException("UDPClient or UDPServer is NULL!! Can not connect UDPServer and UDPClient!");
         }
 
-        server.startAsync();
-        client.startAsync();
+        UDPServer.startAsync();
+        UDPClient.startAsync();
 
-        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
+        MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(UDPServer.class,"sendMessage")[0], UDPServer, UDPClient);
         new Thread(sendAsync).start();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!server.finished){
+                while(!UDPServer.finished){
                     //...
                 }
-                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+                new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0], UDPClient)).start();
 
             }
         }).start();
     }
 
     /**
-     * Create connection between server and client (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)
-     * @param client Client which should connected to server
-     * @param server Server
+     * Create connection between UDPServer and UDPClient (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)
+     * @param UDPClient UDPClient which should connected to UDPServer
+     * @param UDPServer UDPServer
      * @throws NetworkHelperException
      */
-    public static void ConnectClientToServer(final Client client,final Server server) throws NetworkHelperException, IOException {
+    public static void ConnectClientToServer(final UDPClient UDPClient,final UDPServer UDPServer) throws NetworkHelperException, IOException {
 
-        if(client == null || server == null){
-            throw new NetworkHelperException("Client or server is NULL!! Can not connect server and client!");
+        if(UDPClient == null || UDPServer == null){
+            throw new NetworkHelperException("UDPClient or UDPServer is NULL!! Can not connect UDPServer and UDPClient!");
         }
 
-        server.startAsync();
-        client.startAsync();
+        UDPServer.startAsync();
+        UDPClient.startAsync();
 
-        new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+        new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0], UDPClient)).start();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!client.finished){
+                while(!UDPClient.finished){
                     //...
                 }
-                MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],server,client);
+                MyRunnable sendAsync = new MyRunnable(Common.getMethodFromClass(UDPServer.class,"sendMessage")[0], UDPServer, UDPClient);
                 new Thread(sendAsync).start();
-                while(!server.finished){
+                while(!UDPServer.finished){
                     //...
                 }
 
@@ -267,23 +262,23 @@ public class MyNetworkHelper {
                     @Override
                     public void run() {
                         try {
-                            client.SendspecialMessage(Constants.DEFAULT_CLIENT_MESSAGE);
+                            UDPClient.SendspecialMessage(Constants.DEFAULT_CLIENT_MESSAGE);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 }).start();
 
-                //new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"SendspecialMessage")[0],client,Constants.DEFAULT_CLIENT_MESSAGE)).start();
-                //create client for mobile data and send message to server, and back
+                //new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"SendspecialMessage")[0],UDPClient,Constants.DEFAULT_CLIENT_MESSAGE)).start();
+                //create UDPClient for mobile data and send message to UDPServer, and back
 
 
 
-                Client mobDataClient = null;
-                Server wifiDataServer = null;
+                UDPClient mobDataUDPClient = null;
+                UDPServer wifiDataUDPServer = null;
                 //try {
-                    //wifiDataServer = new Server(0,client.getInternalAddress(),client.getExternelAddress());
-                    //mobDataClient = new Client(server.getInternalAddress(),0,wifiDataServer,server.getExternalAddress());
+                    //wifiDataUDPServer = new UDPServer(0,UDPClient.getInternalAddress(),UDPClient.getExternelAddress());
+                    //mobDataUDPClient = new UDPClient(UDPServer.getInternalAddress(),0,wifiDataUDPServer,UDPServer.getExternalAddress());
 
                 /*} catch (SocketException e) {
                     e.printStackTrace();
@@ -293,12 +288,12 @@ public class MyNetworkHelper {
                     e.printStackTrace();
                 }*/
 
-               // new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],mobDataClient)).start();
-               // while (!mobDataClient.finished){
+               // new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0],mobDataUDPClient)).start();
+               // while (!mobDataUDPClient.finished){
                     //... wait
                 //}
 
-                //new Thread(new MyRunnable(Common.getMethodFromClass(Server.class,"sendMessage")[0],wifiDataServer,mobDataClient)).start();
+                //new Thread(new MyRunnable(Common.getMethodFromClass(UDPServer.class,"sendMessage")[0],wifiDataUDPServer,mobDataUDPClient)).start();
 
             }
         }).start();
@@ -307,19 +302,19 @@ public class MyNetworkHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!client.finished && !server.finished){
+                while(!UDPClient.finished && !UDPServer.finished){
                     //wait...
                 }
                 //receiver
-                new Thread(new MyRunnable(Common.getMethodFromClass(Server.class,"initReceiver")[0],server,client)).start();
+                new Thread(new MyRunnable(Common.getMethodFromClass(UDPServer.class,"initReceiver")[0],UDPServer,UDPClient)).start();
                 //sender
-                new Thread(new MyRunnable(Common.getMethodFromClass(Client.class,"sendMessage")[0],client)).start();
+                new Thread(new MyRunnable(Common.getMethodFromClass(UDPClient.class,"sendMessage")[0],UDPClient)).start();
             }
         }).start();
 */
-        //client.sendMessage();
+        //UDPClient.sendMessage();
 
-        //server.sendMessage(client);
-        //client.sendMessage("Ist das angekoemmon?");
+        //UDPServer.sendMessage(UDPClient);
+        //UDPClient.sendMessage("Ist das angekoemmon?");
     }
 }
