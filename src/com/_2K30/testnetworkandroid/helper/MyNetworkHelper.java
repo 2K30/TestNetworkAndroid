@@ -3,11 +3,16 @@ package com._2K30.testnetworkandroid.helper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -15,6 +20,7 @@ import java.util.Enumeration;
 import org.apache.http.conn.util.InetAddressUtils;
 
 import android.app.Activity;
+import android.app.backup.BackupDataInputStream;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
@@ -243,6 +249,29 @@ public class MyNetworkHelper {
         }).start();*/
 
     }
+
+    public static void ConnectToJoJoServer(final InetAddress wifiClientAddress, final int wifiLocalPort, final InetAddress mobileDataLocalAddress, final int mobileDataInternalPort, String joJoIp,int joJoPort, UDPClient wifi, final UDPServer mobileData) throws IOException, InterruptedException {
+        //Socket socketWifi = new Socket(joJoIp,joJoPort,wifiClientAddress,wifiLocalPort);
+        //final int socketPortWifi = socketWifi.getLocalPort();
+        /*OutputStream outstream = socketWifi.getOutputStream();
+        PrintWriter out = new PrintWriter(outstream);
+        String message = "give me my PORT";
+        out.print(message);
+        */
+
+        /**
+         * Try to use same piunching method as by UDP!
+         */
+
+        //TODO: .... TCP hole punching.... A->B A->B | B->A B->A | A-> waint on B...  .... B->A => connected!
+        // use hole punching for more possible ports over the internal port. Use threads and switch to NDK cpp / c
+        // not all routers with NAT support internal<->external to arrive socket. internal<->?external?.
+        // same issue for mobile data. internal 1111 <-> external (fore example) 1455. use xThread for xPorts. break in case of connection. if not, try under the known port!
+        // use this algorithm for both (wireless and mobile data)
+
+
+    }
+
 
     /**
      * Create connection between UDPServer and UDPClient (skype like http://www.heise.de/security/artikel/Klinken-putzen-271494.html)

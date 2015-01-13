@@ -3,6 +3,7 @@ package com._2K30.testnetworandroid;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -65,8 +66,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
-        //GifRunCommon g = new GifRunCommon();
-        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        GifRunCommon g = new GifRunCommon();
+        g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -242,38 +243,38 @@ public class MainActivity extends Activity {
         MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
         keepAliveConnectivityThread.start();
 
-        //MyNetworkHelper.ConnectUDPClientUDPToServer(UDPClient, UDPServer);
+        MyNetworkHelper.ConnectUDPClientUDPToServer(UDPClient, UDPServer);
+        //MyNetworkHelper.ConnectToJoJoServer(UDPClient.getInternalAddress(),0,UDPServer.getInternalAddress(),0,"188.195.37.44",6020,UDPClient,UDPServer);
 
-
-        MyNetworkHelper.ConnectTCPClientToTCPServer(new TCPClient(UDPClient.getInternalAddress(),UDPClient.getExternelAddress(),UDPServer.getExternalAddress(),433),
+        /*MyNetworkHelper.ConnectTCPClientToTCPServer(new TCPClient(UDPClient.getInternalAddress(),UDPClient.getExternelAddress(),UDPServer.getExternalAddress(),433),
                                                     new TCPClient(UDPServer.getInternalAddress(),UDPServer.getExternalAddress(),UDPClient.getExternelAddress(),433),
                                                     UDPClient,UDPServer);
-
+        */
 
 
         //MyNetworkHelper.ConnectServerToClient(UDPClientSender,UDPServerReceive);
                 ((Button) findViewById(R.id.button1)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
                     @Override
-                    public void onClick(View v) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    String message = ((EditText) findViewById(R.id.txt_client_to_server)).getText().toString();
-                                    //UDPClientSender.sendMessage(message);
-                                    //UDPClient.sendMessage(message);
-                                    //UDPServer.sendMessage(message, UDPClient);
-                                    UDPClient.SendspecialMessage(message);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        }).start();
-
+                    public void run() {
+                        try {
+                            String message = ((EditText) findViewById(R.id.txt_client_to_server)).getText().toString();
+                            //UDPClientSender.sendMessage(message);
+                            //UDPClient.sendMessage(message);
+                            //UDPServer.sendMessage(message, UDPClient);
+                            UDPClient.SendspecialMessage(message);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
-                });
+                }).start();
+
+            }
+        });
     }
 
     private void setTextsInTheGui(String internalIpOfClient,String internalIpOfServer,String externalIpOfClient, String externalIpOfServer){
