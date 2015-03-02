@@ -263,7 +263,7 @@ public class MyNetworkHelper {
          * Try to use same piunching method as by UDP!
          */
 
-        //TODO: .... TCP hole punching.... A->B A->B | B->A B->A | A-> waint on B...  .... B->A => connected!
+        //TODO: .... TCP hole punching.... A->B A->B | B->A B->A | A-> wait on B...  .... B->A => connected!
         // use hole punching for more possible ports over the internal port. Use threads and switch to NDK cpp / c
         // not all routers with NAT support internal<->external to arrive socket. internal<->?external?.
         // same issue for mobile data. internal 1111 <-> external (fore example) 1455. use xThread for xPorts. break in case of connection. if not, try under the known port!
