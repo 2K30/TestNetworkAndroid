@@ -85,7 +85,7 @@ public class UDPClient {
                         @Override
                         public void run() {
 
-                            byte[] receiveData = new byte[65508];
+                            byte[] receiveData = new byte[Constants.MAX_LENGTH_UDP_PACKAGE];
                             int counter = 0;
                             while(!Thread.currentThread().isInterrupted()){
                                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);

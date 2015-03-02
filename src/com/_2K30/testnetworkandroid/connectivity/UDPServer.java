@@ -88,7 +88,7 @@ public class UDPServer {
                         @Override
                         public void run() {
 
-                            byte[] receiveData = new byte[65508];
+                            byte[] receiveData = new byte[Constants.MAX_LENGTH_UDP_PACKAGE];
 
                             while (!Thread.currentThread().isInterrupted()) {
 

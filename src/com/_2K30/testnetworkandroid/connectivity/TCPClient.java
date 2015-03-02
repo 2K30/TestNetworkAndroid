@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Created by kko on 07.01.2015.
+ * Created by 2K30 on 07.01.2015.
  */
 
 //TODO try to connect to target over targetInternPort+X<=maxPort. if not try reverse way port+x<targetInternPort
