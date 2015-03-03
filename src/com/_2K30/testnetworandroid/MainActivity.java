@@ -39,6 +39,8 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
+    private MyRunnable keepConnectivity = null;
+
     //======== layouts ===========
 	private RelativeLayout m_mainLayout;
 	private RelativeLayout m_preloadedRelativeLayout;
@@ -66,8 +68,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
-        GifRunCommon g = new GifRunCommon();
-        g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        //GifRunCommon g = new GifRunCommon();
+        //g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
@@ -228,20 +230,27 @@ public class MainActivity extends Activity {
                 showHideLoadingProcess(false);
             }
         });
-
+        if(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface) == ""){
+            if(this.keepConnectivity == null){
+                keepConnectivity  = new MyRunnable(Common.getMethodFromClass(MyNetworkHelper.class,"keepInterfaceAllive")[0],m_myNetworkHelper,mobileDataNetworkInterface,this.m_connectivityManager);
+                MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
+                keepAliveConnectivityThread.start();
+            }
+            executeStartLogic();
+        }
         //now create connection between UDPServer and UDPClient
         final UDPServer UDPServer = new UDPServer(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
         final UDPClient UDPClient = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0, UDPServer,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
         UDPServer.conManager = this.m_connectivityManager;
         UDPClient.conManager = this.m_connectivityManager;
 
+
+
         final UDPServer UDPServerReceive = new UDPServer(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
         final UDPClient UDPClientSender = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0, UDPServerReceive,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
 
 
-        MyRunnable keepConnectivity = new MyRunnable(Common.getMethodFromClass(MyNetworkHelper.class,"keepInterfaceAllive")[0],m_myNetworkHelper,mobileDataNetworkInterface,this.m_connectivityManager);
-        MyAndroidThread keepAliveConnectivityThread  = new MyAndroidThread(keepConnectivity);
-        keepAliveConnectivityThread.start();
+
 
         MyNetworkHelper.ConnectUDPClientUDPToServer(UDPClient, UDPServer);
         //MyNetworkHelper.ConnectToJoJoServer(UDPClient.getInternalAddress(),0,UDPServer.getInternalAddress(),0,"188.195.37.44",6020,UDPClient,UDPServer);
@@ -291,6 +300,12 @@ public class MainActivity extends Activity {
 
             txtServerExternalIp.setText("External IP of UDPClient: " + externalIpOfClient);
             txtClientExternalIp.setText("External IP of UDPServer: " + externalIpOfServer);
+    }
+
+    private void setKindOfPunchingUseage(String text){
+        TextView txtUseage = (TextView) findViewById(R.id.text_over_tcp_udp);
+
+        txtUseage.setText(text);
     }
 
     private void showBootAnimation(boolean show){

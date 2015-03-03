@@ -122,5 +122,15 @@
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/textView2"
         android:text="Reload" />
-    
+
+    <TextView
+        android:id="@+id/text_over_tcp_udp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Over UDP / TCP"
+        android:textColor="@color/white"
+        android:layout_alignTop="@+id/bootLoadingLayout"
+        android:layout_alignRight="@+id/bootLoadingLayout"
+        android:layout_alignEnd="@+id/bootLoadingLayout" />
+
 </RelativeLayout>

@@ -141,35 +141,44 @@ public class MyNetworkHelper {
 	 * @throws IOException
 	 * @throws NetworkHelperException 
 	 */
-	public String getExternalIpOfInterface(NetworkInterface networkInterface) throws IOException, NetworkHelperException{
-		
-		if(networkInterface == null){
-			throw new NetworkHelperException("Can not determine public ip of interface wich is null!");
-		}
-		
-		Process process = null;
+	public String getExternalIpOfInterface(NetworkInterface networkInterface) throws IOException, NetworkHelperException {
+        int maxRepetition = 10;
+        if (networkInterface == null) {
+            throw new NetworkHelperException("Can not determine public ip of interface wich is null!");
+        }
+
+        Process process = null;
 
         //process = Runtime.getRuntime().exec("apt-get install hping3");
 
 
 
-		String command = "curl --interface "+networkInterface.getName()+" http://ipecho.net/plain";
-		
-		process = Runtime.getRuntime().exec(command);
+            String command = "curl --interface " + networkInterface.getName() + " http://ipecho.net/plain";
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		StringBuilder stringBuilder = new StringBuilder();
-		
-		char[] chars = new char[1024];
-		int i;
-		
-		//build the result...
-		while((i=reader.read(chars))>=0){
-			stringBuilder.append(chars,0,i);
-		}
-		process = null;
-		return stringBuilder.toString();
-	}
+            process = Runtime.getRuntime().exec(command);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            char[] chars = new char[1024];
+            int i;
+
+            //build the result...
+            while ((i = reader.read(chars)) >= 0) {
+                stringBuilder.append(chars, 0, i);
+            }
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+            process = null;
+
+                return stringBuilder.toString();
+
+    }
 
     /**
      * Keep the given interface alive. It is necessary to hold connection. Every reconnect leads to new public/internal address
