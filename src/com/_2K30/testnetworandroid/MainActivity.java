@@ -68,8 +68,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         SurfaceView view = (SurfaceView)findViewById(R.id.surfaceView);
-       // GifRunCommon g = new GifRunCommon();
-       // g.LoadGiff(view,mainContext,R.drawable.bootloading);
+        GifRunCommon g = new GifRunCommon();
+        g.LoadGiff(view,mainContext,R.drawable.bootloading);
 
         this.initialize();
         this.showBootAnimation(true);
