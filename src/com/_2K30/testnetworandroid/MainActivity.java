@@ -239,8 +239,17 @@ public class MainActivity extends Activity {
             executeStartLogic();
         }*/
         //now create connection between UDPServer and UDPClient
-        final UDPServer UDPServer = new UDPServer(0,m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
-        final UDPClient UDPClient = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),0, UDPServer,/*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+        final UDPServer UDPServer = new UDPServer(0,
+                                                  m_myNetworkHelper.getIpV4AddressOfNetworkInterface(mobileDataNetworkInterface),
+                                                  Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],
+                                                  this,
+                                                  InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(mobileDataNetworkInterface)));
+
+        final UDPClient UDPClient = new UDPClient(m_myNetworkHelper.getIpV4AddressOfNetworkInterface(wifiNetworkInterface),
+                                                  0,
+                                                  UDPServer,
+                                                  /*Common.getMethodFromClass(this.getClass(),"onDataReceiveServer")[0],this,*/InetAddress.getByName(m_myNetworkHelper.getExternalIpOfInterface(wifiNetworkInterface)));
+
         UDPServer.conManager = this.m_connectivityManager;
         UDPClient.conManager = this.m_connectivityManager;
 

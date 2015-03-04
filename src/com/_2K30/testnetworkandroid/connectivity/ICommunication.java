@@ -5,7 +5,7 @@ package com._2K30.testnetworkandroid.connectivity;
  */
 public interface ICommunication {
 
-    public void fireForGivePorts(int[] ports);
+    public void fireForGivenPorts(int[] ports);
 
     public void startToListen();
 
@@ -18,7 +18,5 @@ public interface ICommunication {
     public void sendMessage();
 
     public void sendMessage(String message);
-
-    public void sendSpecialMessage(String message);
 
 }
